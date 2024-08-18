@@ -1,9 +1,13 @@
 package com.nailsSalon.AdriDesign.appointment;
 
+import com.nailsSalon.AdriDesign.customer.Customer;
+import com.nailsSalon.AdriDesign.servicio.Servicio;
+import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariant;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "appointments")
@@ -11,21 +15,30 @@ import java.time.LocalDateTime;
 public class Appointment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
-    @Column(nullable = false)
-    private String customerName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
-    @Column(nullable = false)
-    private String serviceType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id", nullable = false)
+    private Servicio service;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variant_id", nullable = true)
+    private ServicioVariant serviceVariant;
 
     @Column(nullable = false)
     private LocalDateTime appointmentDate;
 
-    @Column(nullable = false)
-    private double estimatedCost;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean depositPaid;
+    private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private boolean isConfirmed;
 }

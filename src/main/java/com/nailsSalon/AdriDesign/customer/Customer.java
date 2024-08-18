@@ -21,6 +21,9 @@ public class Customer {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "password", nullable = false)//, nullable = true
+    private String password;
+
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
@@ -29,6 +32,11 @@ public class Customer {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    private boolean enabled;
+    private boolean accountNotExpired;
+    private boolean accountNotLocked;
+    private boolean credentialNotExpired;
 
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
