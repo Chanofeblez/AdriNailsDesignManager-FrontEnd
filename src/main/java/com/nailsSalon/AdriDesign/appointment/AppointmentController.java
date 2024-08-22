@@ -1,7 +1,9 @@
 package com.nailsSalon.AdriDesign.appointment;
 
+import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,11 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/appointment")
+@RequestMapping("/api/appointments")
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
 
     @Autowired
     public AppointmentController(AppointmentService appointmentService) {
@@ -34,12 +35,19 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Appointment createAppointment(@RequestBody Appointment appointment) {
-        return appointmentService.createAppointment(appointment);
+    public ResponseEntity<?> createAppointment(@RequestBody AppointmentRequestDTO appointment) {
+        try {
+            Appointment createdAppointment = appointmentService.createAppointment(appointment);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating appointment");
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Appointment> updateAppointment(@PathVariable UUID id, @RequestBody Appointment appointmentDetails) {
+    public ResponseEntity<Appointment> updateAppointment(@PathVariable UUID id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         try {
             Appointment updatedAppointment = appointmentService.updateAppointment(id, appointmentDetails);
             return ResponseEntity.ok(updatedAppointment);
@@ -53,5 +61,5 @@ public class AppointmentController {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.noContent().build();
     }
-
 }
+

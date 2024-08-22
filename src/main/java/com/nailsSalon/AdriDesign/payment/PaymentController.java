@@ -1,5 +1,6 @@
 package com.nailsSalon.AdriDesign.payment;
 
+import com.nailsSalon.AdriDesign.dto.PaymentRequestDTO;
 import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.Money;
 import com.squareup.square.models.Payment;
@@ -29,7 +30,7 @@ public class PaymentController {
     }
 
     @PostMapping("/charge")
-    public ResponseEntity<?> processPayment(@RequestBody PaymentRequest paymentRequest) {
+    public ResponseEntity<?> processPayment(@RequestBody PaymentRequestDTO paymentRequest) {
         if (paymentRequest.getSourceId() == null || paymentRequest.getAmount() <= 0) {
             return ResponseEntity.badRequest().body("Invalid payment details");
         }
@@ -42,16 +43,13 @@ public class PaymentController {
 
             String idempotencyKey = UUID.randomUUID().toString();
 
-            // Extraer customerId y locationId del paymentRequest
-            String customerId = paymentRequest.getCustomerId();
-            String locationId = paymentRequest.getLocationId();
-
-            Payment payment = squarePaymentService.createPayment(
+            SalonPayment payment = squarePaymentService.createPayment(
                     paymentRequest.getSourceId(),
                     idempotencyKey,
                     amountMoney,
-                    customerId,
-                    locationId
+                    paymentRequest.getCustomerId(),
+                    paymentRequest.getLocationId(),
+                    paymentRequest.getAppointmentId()
             );
             return ResponseEntity.ok(payment);
         } catch (ApiException e) {

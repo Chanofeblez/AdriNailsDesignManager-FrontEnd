@@ -1,6 +1,8 @@
 package com.nailsSalon.AdriDesign.serviciovariant;
 
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +12,8 @@ import java.util.UUID;
 
 @Service
 public class ServicioVariantService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServicioVariantController.class);
 
     private final ServicioVariantRepository serviceVariantRepository;
 
@@ -27,6 +31,7 @@ public class ServicioVariantService {
     }
 
     public ServicioVariant createServiceVariant(ServicioVariant serviceVariant) {
+        LOGGER.info("Creando ServicioVariant {}", serviceVariant);
         return serviceVariantRepository.save(serviceVariant);
     }
 
@@ -35,7 +40,6 @@ public class ServicioVariantService {
             serviceVariant.setName(serviceVariantDetails.getName());
             serviceVariant.setDescription(serviceVariantDetails.getDescription());
             serviceVariant.setPrice(serviceVariantDetails.getPrice());
-            serviceVariant.setService(serviceVariantDetails.getService());
             return serviceVariantRepository.save(serviceVariant);
         }).orElseThrow(() -> new ResourceNotFoundException("ServiceVariant not found with id " + id));
     }

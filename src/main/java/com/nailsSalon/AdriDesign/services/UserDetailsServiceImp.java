@@ -42,16 +42,16 @@ public class UserDetailsServiceImp implements UserDetailsService {
                 .orElseThrow(()-> new UsernameNotFoundException("El usuario "+email+" no fue encontrado"));
 
         //Creamos una lista para los permisos
-        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+         List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
 
         //Taer roles y convertirlos en SimpleGrantedAuthority
-      //  customer.getRolesList()
-      //          .forEach(role -> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRole()))));
+        //  customer.getRolesList()
+        //          .forEach(role -> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRole()))));
 
         //Traer permisos y convertirlos en SimpleGrantedAuthority
-      //  customer.getRolesList().stream()
-      //          .flatMap(role -> role.getPermissionsList().stream())
-      //          .forEach(permission -> authorityList.add(new SimpleGrantedAuthority(permission.getPermissionName())));
+        //  customer.getRolesList().stream()
+        //          .flatMap(role -> role.getPermissionsList().stream())
+        //          .forEach(permission -> authorityList.add(new SimpleGrantedAuthority(permission.getPermissionName())));
 
         return new User(
                 customer.getEmail(),
