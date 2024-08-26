@@ -1,21 +1,27 @@
 package com.nailsSalon.AdriDesign.customer;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
+import com.nailsSalon.AdriDesign.payment.PaymentController;
+import com.nailsSalon.AdriDesign.utils.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/api/auth/customers")
 public class CustomerController {
 
     private final CustomerService customerService;
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private JwtUtils jwtUtils;
 
     @Autowired
     public CustomerController(CustomerService customerService) {
@@ -32,6 +38,26 @@ public class CustomerController {
         Optional<Customer> customer = customerService.getCustomerById(id);
         return customer.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/extract-username")
+    public ResponseEntity<Map<String, String>> extractUsername(@RequestBody Map<String, String> tokenRequest) {
+        String token = tokenRequest.get("token");
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Token is missing"));
+        }
+
+        // Decodificar el token JWT
+        DecodedJWT decodedJWT = JWT.decode(token);
+
+        // Extraer el nombre de usuario del token decodificado
+        String username = decodedJWT.getSubject();
+
+        // Retornar el username dentro de un objeto JSON
+        Map<String, String> response = new HashMap<>();
+        response.put("username", username);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

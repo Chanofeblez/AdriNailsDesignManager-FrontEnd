@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
 
     // Encuentra todas las citas para un cliente específico
-    List<Appointment> findByCustomerId(UUID customerId);
+    List<Appointment> findByCustomerEmail(String customerId);
 
     // Encuentra todas las citas para un servicio específico
     List<Appointment> findByServiceId(UUID serviceId);
@@ -20,7 +20,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     List<Appointment> findByAppointmentDate(LocalDateTime appointmentDate);
 
     // Encuentra todas las citas confirmadas
-    List<Appointment> findByIsConfirmed(boolean isConfirmed);
+    List<Appointment> findByStatus(AppointmentStatus status);
 
 
 }

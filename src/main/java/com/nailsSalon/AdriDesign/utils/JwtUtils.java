@@ -6,6 +6,9 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nailsSalon.AdriDesign.payment.PaymentController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +21,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class JwtUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
     @Value("${security.jwt.private.key}")
     private String privateKey;
 
@@ -66,7 +71,13 @@ public class JwtUtils {
 
     //Metodo para obtener el usuario/username
     public String extractUsername(DecodedJWT decodedJWT){
+        logger.error("username in JWTUtil " + decodedJWT.getSubject());
         return decodedJWT.getSubject().toString();
+        // Suponiendo que el username está almacenado en el 'subject' del token
+        //return decodedJWT.getSubject();
+
+        // Si el username está en otro claim, por ejemplo 'username', usa:
+        //return decodedJWT.getClaim("username").asString();
     }
 
     //Obtener un Claim en particular

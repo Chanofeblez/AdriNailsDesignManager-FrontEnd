@@ -2,18 +2,24 @@ package com.nailsSalon.AdriDesign.appointment;
 
 import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
+import com.nailsSalon.AdriDesign.payment.PaymentController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
     private final AppointmentService appointmentService;
 
@@ -32,6 +38,14 @@ public class AppointmentController {
         Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
         return appointment.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByUser(@PathVariable String userId) {
+        logger.info("user", userId);
+        List<Appointment> appointments = appointmentService.getAppointmentsByUserId(userId);
+        logger.info("appointment", appointments);
+        return ResponseEntity.ok(appointments);
     }
 
     @PostMapping
@@ -54,6 +68,17 @@ public class AppointmentController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/{appointmentId}/status")
+    public ResponseEntity<Appointment> updateAppointmentStatus(
+            @PathVariable UUID appointmentId,
+            @RequestBody Map<String, String> request) {
+
+        String statusString = request.get("status");
+        AppointmentStatus status = AppointmentStatus.valueOf(statusString.toUpperCase());
+        Appointment updatedAppointment = appointmentService.updateAppointmentStatus(appointmentId, status);
+        return ResponseEntity.ok(updatedAppointment);
     }
 
     @DeleteMapping("/{id}")

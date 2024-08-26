@@ -54,8 +54,9 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean isConfirmed;
+    private AppointmentStatus status = AppointmentStatus.PENDING;
 
     // Método que se ejecuta antes de guardar un nuevo registro
     @PrePersist

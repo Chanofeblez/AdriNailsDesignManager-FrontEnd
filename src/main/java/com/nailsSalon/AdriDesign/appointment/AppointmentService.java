@@ -4,10 +4,13 @@ import com.nailsSalon.AdriDesign.customer.Customer;
 import com.nailsSalon.AdriDesign.customer.CustomerRepository;
 import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
+import com.nailsSalon.AdriDesign.payment.PaymentController;
 import com.nailsSalon.AdriDesign.servicio.Servicio;
 import com.nailsSalon.AdriDesign.servicio.ServicioRepository;
 import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariant;
 import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariantRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
     private final AppointmentRepository appointmentRepository;
     private final CustomerRepository customerRepository;
@@ -44,6 +49,11 @@ public class AppointmentService {
         return appointmentRepository.findById(id);
     }
 
+    public List<Appointment> getAppointmentsByUserId(String userId) {
+        logger.info("user2", userId);
+        return appointmentRepository.findByCustomerEmail(userId);
+    }
+
     public Appointment createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
         // Buscar el Customer en la base de datos
         Customer customer = customerRepository.findById(appointmentRequestDTO.getUser().getId())
@@ -60,6 +70,9 @@ public class AppointmentService {
         appointment.setAppointmentDate(LocalDate.parse(appointmentRequestDTO.getDate()));
         appointment.setAppointmentTime(LocalTime.parse(appointmentRequestDTO.getTime()));
         appointment.setTotalCost(BigDecimal.valueOf(appointmentRequestDTO.getTotalCost()));
+
+        // Establecer el estado inicial del Appointment como PENDING
+        appointment.setStatus(AppointmentStatus.PENDING);
 
         // Agregar las variantes de servicio
         List<UUID> variantIds = appointmentRequestDTO.getVariantes().stream()
@@ -95,6 +108,18 @@ public class AppointmentService {
             throw new ResourceNotFoundException("Appointment not found with id " + id);
         }
         appointmentRepository.deleteById(id);
+    }
+
+    public Appointment updateAppointmentStatus(UUID appointmentId, AppointmentStatus status) {
+        // Buscar la cita en la base de datos
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id " + appointmentId));
+
+        // Actualizar el estado
+        appointment.setStatus(status);
+
+        // Guardar la cita actualizada en la base de datos
+        return appointmentRepository.save(appointment);
     }
 
 
