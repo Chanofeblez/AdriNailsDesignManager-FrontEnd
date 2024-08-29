@@ -40,6 +40,13 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/by-email")
+    public ResponseEntity<Customer> getCustomerByEmail(@RequestParam String email) {
+        return customerService.getCustomerByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/extract-username")
     public ResponseEntity<Map<String, String>> extractUsername(@RequestBody Map<String, String> tokenRequest) {
         String token = tokenRequest.get("token");

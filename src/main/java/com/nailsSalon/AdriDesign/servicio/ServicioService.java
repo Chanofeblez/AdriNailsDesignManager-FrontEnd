@@ -30,6 +30,10 @@ public class ServicioService {
         return servicioRepository.findById(id);
     }
 
+    public Optional<Servicio> getServicioByName(String name) {
+        return servicioRepository.findByName(name);
+    }
+
     public Servicio createService(Servicio service) {
         // Validación de negocio antes de guardar
         validateService(service);

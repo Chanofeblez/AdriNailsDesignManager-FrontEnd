@@ -49,9 +49,22 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createAppointment(@RequestBody AppointmentRequestDTO appointment) {
+    public ResponseEntity<?> createAppointment(@RequestBody AppointmentRequestDTO appointmentDTO) {
+        logger.info("Appointment Request DTO: {}", appointmentDTO);
         try {
-            Appointment createdAppointment = appointmentService.createAppointment(appointment);
+            // Asume que el DTO contiene los IDs necesarios
+            String customerEmail = appointmentDTO.getCustomerEmail();
+            logger.info("Captura de email1: {}", appointmentDTO.getCustomerEmail());
+            logger.info("Captura de email2: {}", customerEmail);
+            String serviceName = appointmentDTO.getServiceName();
+            List<UUID> serviceVariantIds = appointmentDTO.getServiceVariantIds();
+
+            logger.info("Antes del servicio");
+
+            // Llama al servicio para crear el appointment pasando los IDs
+            Appointment createdAppointment = appointmentService.createAppointment(customerEmail, serviceName, serviceVariantIds,
+                    appointmentDTO.getAppointmentDate(), appointmentDTO.getAppointmentTime(),
+                    appointmentDTO.getTotalCost(), appointmentDTO.getStatus());
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -43,8 +43,7 @@ public class Customer {
     private boolean accountNotLocked;
     private boolean credentialNotExpired;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Appointment> appointments = new ArrayList<>();
+    //private List<Appointment> appointments = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SalonPayment> payments = new ArrayList<>();

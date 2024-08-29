@@ -2,11 +2,15 @@ package com.nailsSalon.AdriDesign.appointment;
 
 import com.nailsSalon.AdriDesign.customer.Customer;
 import com.nailsSalon.AdriDesign.customer.CustomerRepository;
+import com.nailsSalon.AdriDesign.customer.CustomerService;
 import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
 import com.nailsSalon.AdriDesign.payment.PaymentController;
+import com.nailsSalon.AdriDesign.reservedslot.ReservedSlot;
+import com.nailsSalon.AdriDesign.reservedslot.ReservedSlotRepository;
 import com.nailsSalon.AdriDesign.servicio.Servicio;
 import com.nailsSalon.AdriDesign.servicio.ServicioRepository;
+import com.nailsSalon.AdriDesign.servicio.ServicioService;
 import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariant;
 import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariantRepository;
 import org.slf4j.Logger;
@@ -30,15 +34,21 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final CustomerRepository customerRepository;
+
     private final ServicioRepository servicioRepository;
+
     private final ServicioVariantRepository servicioVariantRepository;
+    private final ReservedSlotRepository reservedSlotRepository;
 
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository, CustomerRepository customerRepository, ServicioRepository servicioRepository, ServicioVariantRepository servicioVariantRepository) {
+    public AppointmentService(AppointmentRepository appointmentRepository, CustomerRepository customerRepository,
+                              ServicioRepository servicioRepository, ServicioVariantRepository servicioVariantRepository,
+                              ReservedSlotRepository reservedSlotRepository) {
         this.appointmentRepository = appointmentRepository;
         this.customerRepository = customerRepository;
         this.servicioRepository = servicioRepository;
         this.servicioVariantRepository = servicioVariantRepository;
+        this.reservedSlotRepository = reservedSlotRepository;
     }
 
     public List<Appointment> getAllAppointments() {
@@ -54,54 +64,71 @@ public class AppointmentService {
         return appointmentRepository.findByCustomerEmail(userId);
     }
 
-    public Appointment createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
-        // Buscar el Customer en la base de datos
-        Customer customer = customerRepository.findById(appointmentRequestDTO.getUser().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-
-        // Buscar el Servicio en la base de datos
-        Servicio service = servicioRepository.findByName(appointmentRequestDTO.getServiceName())
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
-
-        // Crear un nuevo Appointment
+    public Appointment createAppointment(String customerEmail, String serviceName, List<UUID> variantIds,
+                                         String date, String time, BigDecimal totalCost,
+                                         AppointmentStatus status) {
+        logger.info("Dentro del servicio");
         Appointment appointment = new Appointment();
-        appointment.setCustomer(customer);
-        appointment.setService(service);
-        appointment.setAppointmentDate(LocalDate.parse(appointmentRequestDTO.getDate()));
-        appointment.setAppointmentTime(LocalTime.parse(appointmentRequestDTO.getTime()));
-        appointment.setTotalCost(BigDecimal.valueOf(appointmentRequestDTO.getTotalCost()));
-
-        // Establecer el estado inicial del Appointment como PENDING
-        appointment.setStatus(AppointmentStatus.PENDING);
-
-        // Agregar las variantes de servicio
-        List<UUID> variantIds = appointmentRequestDTO.getVariantes().stream()
-                .map(ServicioVariant::getId)
+        List<String> uuidStrings = variantIds.stream()
+                .map(UUID::toString)
                 .collect(Collectors.toList());
 
-        List<ServicioVariant> serviceVariants = servicioVariantRepository.findAllById(variantIds);
-        appointment.setServiceVariants(serviceVariants);
+        logger.info("antes de crear appointmet: {}", uuidStrings);
+        String timeString = time + ":00"; // convierte el número a "03:00"
+        logger.info("antes de crear appointmet: {}", timeString);
 
-        // Guardar el Appointment en la base de datos
+        // Asignar los valores
+        appointment.setCustomerEmail(customerEmail);
+        logger.info("email: {}", appointment.getCustomerEmail());
+        appointment.setServiceName(serviceName);
+        logger.info("servicio: {}", appointment.getServiceName());
+        appointment.setServiceVariantIds(uuidStrings);
+        logger.info("variantes: {}", appointment.getServiceVariantIds());
+        appointment.setAppointmentDate(LocalDate.parse(date));
+        logger.info("date: {}", appointment.getAppointmentDate());
+        appointment.setAppointmentTime(LocalTime.parse(timeString));
+        logger.info("time: {}", appointment.getAppointmentTime());
+        appointment.setTotalCost(totalCost);
+        logger.info("costo: {}", appointment.getTotalCost());
+        appointment.setStatus(status);
+        logger.info("status: {}", appointment.getStatus());
+
+        logger.info("AppointmentInService: {}", appointment);
+
+        ReservedSlot reservedSlot = new ReservedSlot();
+        reservedSlot.setDate(appointment.getAppointmentDate());
+        reservedSlot.setTime(appointment.getAppointmentTime());
+
+        reservedSlotRepository.save(reservedSlot);
+
         return appointmentRepository.save(appointment);
     }
 
     public Appointment updateAppointment(UUID id, AppointmentRequestDTO appointmentRequestDTO) {
         return appointmentRepository.findById(id).map(appointment -> {
-            appointment.setAppointmentDate(LocalDate.parse(appointmentRequestDTO.getDate()));
-            appointment.setAppointmentTime(LocalTime.parse(appointmentRequestDTO.getTime()));
-            appointment.setTotalCost(BigDecimal.valueOf(appointmentRequestDTO.getTotalCost()));
+            // Actualizar la fecha y hora
+                appointment.setAppointmentDate(LocalDate.parse(appointmentRequestDTO.getAppointmentDate()));
+                appointment.setAppointmentTime(LocalTime.parse(appointmentRequestDTO.getAppointmentTime()));
+                appointment.setTotalCost(appointmentRequestDTO.getTotalCost());
 
-            List<UUID> variantIds = appointmentRequestDTO.getVariantes().stream()
-                    .map(ServicioVariant::getId)
-                    .collect(Collectors.toList());
+            // Actualizar el servicio si se proporcionó un nuevo ID de servicio
+            if (appointmentRequestDTO.getServiceName() != null) {
+                Servicio service = servicioRepository.findByName(appointmentRequestDTO.getServiceName())
+                        .orElseThrow(() -> new ResourceNotFoundException("Service not found with id " + appointmentRequestDTO.getServiceName()));
+                appointment.setServiceName(appointmentRequestDTO.getServiceName());
+            }
 
-            List<ServicioVariant> serviceVariants = servicioVariantRepository.findAllById(variantIds);
-            appointment.setServiceVariants(serviceVariants);
+            // Actualizar los variantes de servicio si se proporcionaron
+            if (appointmentRequestDTO.getServiceVariantIds() != null && !appointmentRequestDTO.getServiceVariantIds().isEmpty()) {
+                List<ServicioVariant> serviceVariants = servicioVariantRepository.findAllById(appointmentRequestDTO.getServiceVariantIds());
+               // appointment.setServiceVariants(serviceVariants);
+            }
 
+            // Guardar y devolver la cita actualizada
             return appointmentRepository.save(appointment);
         }).orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id " + id));
     }
+
 
     public void deleteAppointment(UUID id) {
         if (!appointmentRepository.existsById(id)) {

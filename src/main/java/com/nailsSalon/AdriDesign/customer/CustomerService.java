@@ -39,6 +39,10 @@ public class CustomerService {
         return Optional.ofNullable(customerExistente);
     }
 
+    public Optional<Customer> getCustomerByEmail(String email) {
+        return customerRepository.findByEmail(email);
+    }
+
     public Customer createCustomer(Customer customer) {
         LOGGER.info("Creando miembro {}", customer);
 

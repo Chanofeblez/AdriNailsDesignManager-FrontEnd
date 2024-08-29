@@ -1,8 +1,6 @@
 package com.nailsSalon.AdriDesign.appointment;
 
-import com.nailsSalon.AdriDesign.customer.Customer;
-import com.nailsSalon.AdriDesign.servicio.Servicio;
-import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariant;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "appointments")
 @Data
@@ -23,40 +22,33 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    @Column(name = "customer_email", nullable = false)
+    private String customerEmail;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id", nullable = false)
-    private Servicio service;
+    @Column(name = "service_name", nullable = false)
+    private String serviceName;
 
-    @ManyToMany
-    @JoinTable(
-            name = "appointment_variant_mapping",
-            joinColumns = @JoinColumn(name = "appointment_id"),
-            inverseJoinColumns = @JoinColumn(name = "variant_id")
-    )
-    private List<ServicioVariant> serviceVariants = new ArrayList<>();
+    @Column(name = "service_variant_ids", nullable = false)
+    private List<String> serviceVariantIds = new ArrayList<>();
 
-    @Column(nullable = false)
+    @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
 
-    @Column(nullable = false)
+    @Column(name = "appointment_time", nullable = false)
     private LocalTime appointmentTime;
 
-    @Column(nullable = false)
+    @Column(name = "total_cost", nullable = false)
     private BigDecimal totalCost;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private AppointmentStatus status = AppointmentStatus.PENDING;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AppointmentStatus status = AppointmentStatus.PENDING;
 
     // Método que se ejecuta antes de guardar un nuevo registro
     @PrePersist
@@ -70,4 +62,5 @@ public class Appointment {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
 }

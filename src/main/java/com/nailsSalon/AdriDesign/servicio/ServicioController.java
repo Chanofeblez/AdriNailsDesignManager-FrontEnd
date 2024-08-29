@@ -32,6 +32,13 @@ public class ServicioController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/by-name")
+    public ResponseEntity<Servicio> getServicioByName(@RequestParam String name) {
+        return serviceService.getServicioByName(name)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public Servicio createService(@RequestBody Servicio service) {
         return serviceService.createService(service);
