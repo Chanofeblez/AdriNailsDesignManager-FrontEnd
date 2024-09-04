@@ -66,9 +66,12 @@ public class AppointmentService {
 
     public Appointment createAppointment(String customerEmail, String serviceName, List<UUID> variantIds,
                                          String date, String time, BigDecimal totalCost,
-                                         AppointmentStatus status) {
-        logger.info("Dentro del servicio");
+                                         AppointmentStatus status, String imagePath) {
+        logger.info("Dentro del servicio: {}", customerEmail, serviceName, variantIds, date, time, totalCost,
+                 status, imagePath);
         Appointment appointment = new Appointment();
+        logger.info("Dentro del servicio2");
+
         List<String> uuidStrings = variantIds.stream()
                 .map(UUID::toString)
                 .collect(Collectors.toList());
@@ -92,6 +95,8 @@ public class AppointmentService {
         logger.info("costo: {}", appointment.getTotalCost());
         appointment.setStatus(status);
         logger.info("status: {}", appointment.getStatus());
+        appointment.setImagePath(imagePath);
+        logger.info("imagePath: {}", appointment.getImagePath());
 
         logger.info("AppointmentInService: {}", appointment);
 
@@ -138,12 +143,14 @@ public class AppointmentService {
     }
 
     public Appointment updateAppointmentStatus(UUID appointmentId, AppointmentStatus status) {
+
         // Buscar la cita en la base de datos
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id " + appointmentId));
 
         // Actualizar el estado
         appointment.setStatus(status);
+
 
         // Guardar la cita actualizada en la base de datos
         return appointmentRepository.save(appointment);

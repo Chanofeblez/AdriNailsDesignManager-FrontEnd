@@ -1,5 +1,6 @@
 package com.nailsSalon.AdriDesign.payment;
 
+import com.nailsSalon.AdriDesign.course.CourseService;
 import com.nailsSalon.AdriDesign.dto.PaymentRequestDTO;
 import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.Money;
@@ -7,10 +8,7 @@ import com.squareup.square.models.Payment;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -23,6 +21,9 @@ public class PaymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
     private final SquarePaymentService squarePaymentService;
+    @Autowired
+    private CourseService courseService;
+
 
     @Autowired
     public PaymentController(SquarePaymentService squarePaymentService) {
@@ -59,5 +60,11 @@ public class PaymentController {
             logger.error("Network error while processing payment", e);
             return ResponseEntity.status(500).body("Payment processing failed due to a network error.");
         }
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<Boolean> verifyPayment(@RequestParam UUID courseId, @RequestParam UUID userId) {
+        boolean hasPaid = courseService.verifyPayment(courseId, userId);
+        return ResponseEntity.ok(hasPaid);
     }
 }

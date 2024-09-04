@@ -31,6 +31,7 @@ public class ServicioService {
     }
 
     public Optional<Servicio> getServicioByName(String name) {
+        System.out.println("name receiv in Service: " + name);
         return servicioRepository.findByName(name);
     }
 

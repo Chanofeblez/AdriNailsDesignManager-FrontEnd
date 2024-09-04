@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/appointments")
+@CrossOrigin(origins = "http://localhost:8100")
 public class AppointmentController {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
@@ -64,7 +65,7 @@ public class AppointmentController {
             // Llama al servicio para crear el appointment pasando los IDs
             Appointment createdAppointment = appointmentService.createAppointment(customerEmail, serviceName, serviceVariantIds,
                     appointmentDTO.getAppointmentDate(), appointmentDTO.getAppointmentTime(),
-                    appointmentDTO.getTotalCost(), appointmentDTO.getStatus());
+                    appointmentDTO.getTotalCost(), appointmentDTO.getStatus(), appointmentDTO.getImagePath());
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -74,13 +75,25 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Appointment> updateAppointment(@PathVariable UUID id, @RequestBody AppointmentRequestDTO appointmentDetails) {
-        try {
-            Appointment updatedAppointment = appointmentService.updateAppointment(id, appointmentDetails);
-            return ResponseEntity.ok(updatedAppointment);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<Appointment> updateAppointment(@PathVariable UUID id, @RequestBody Map<String, String> statusMap) {
+        String status = statusMap.get("status");
+
+        if (status == null) {
+            return ResponseEntity.badRequest().body(null);
         }
+
+        AppointmentStatus appointmentStatus;
+
+        try {
+            System.out.println("try: " + status);
+            appointmentStatus = AppointmentStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Catch: " + e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        Appointment updatedAppointment = appointmentService.updateAppointmentStatus(id, appointmentStatus);
+        return ResponseEntity.ok(updatedAppointment);
     }
 
     @PutMapping("/{appointmentId}/status")

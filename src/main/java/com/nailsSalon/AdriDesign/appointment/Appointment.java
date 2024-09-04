@@ -44,6 +44,9 @@ public class Appointment {
     @Column(name = "status", nullable = false)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
+    @Column(name = "imagePath", nullable = false)
+    private String imagePath;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

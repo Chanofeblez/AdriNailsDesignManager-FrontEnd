@@ -34,6 +34,7 @@ public class ServicioController {
 
     @GetMapping("/by-name")
     public ResponseEntity<Servicio> getServicioByName(@RequestParam String name) {
+        System.out.println("name receiv in Controller: " + name);
         return serviceService.getServicioByName(name)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

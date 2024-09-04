@@ -13,8 +13,8 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    public Image saveImage(String title, byte[] data, String contentType) {
-        Image image = new Image(title, data, contentType);
+    public Image saveImage(String title, byte[] data, String contentType, String type) {
+        Image image = new Image(title, data, contentType, type);
         return imageRepository.save(image);
     }
 

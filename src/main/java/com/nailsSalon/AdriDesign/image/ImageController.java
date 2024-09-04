@@ -20,9 +20,10 @@ public class ImageController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("title") String title,
-                                              @RequestParam("file") MultipartFile file) {
+                                              @RequestParam("file") MultipartFile file,
+                                              @RequestParam("type") String type) {
         try {
-            imageService.saveImage(title, file.getBytes(), file.getContentType());
+            imageService.saveImage(title, file.getBytes(), file.getContentType(),type);
             return new ResponseEntity<>("Image uploaded successfully!", HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>("Failed to upload image", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -33,5 +33,8 @@ public class AppointmentRequestDTO {
 
     @JsonProperty("status")
     private AppointmentStatus status; // Estado de la cita
+
+    @JsonProperty("imagePath")
+    private String imagePath; // Direccion de la imagen del servicio
 }
 
