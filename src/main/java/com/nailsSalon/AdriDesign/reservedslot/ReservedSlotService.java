@@ -34,5 +34,16 @@ public class ReservedSlotService {
     public ReservedSlot reserveSlot(ReservedSlot reservedSlot) {
         return reservedSlotRepository.save(reservedSlot);
     }
+
+    // Método para eliminar un slot reservado
+    public void releaseSlot(LocalDate date, LocalTime time) {
+        List<ReservedSlot> slots = reservedSlotRepository.findByDateAndTime(date, time);
+
+        if (!slots.isEmpty()) {
+            // Eliminar todos los slots coincidentes
+            reservedSlotRepository.deleteAll(slots);
+        }
+    }
+
 }
 

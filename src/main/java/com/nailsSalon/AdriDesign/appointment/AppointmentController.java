@@ -3,17 +3,21 @@ package com.nailsSalon.AdriDesign.appointment;
 import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
 import com.nailsSalon.AdriDesign.payment.PaymentController;
+import com.nailsSalon.AdriDesign.review.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -111,6 +115,51 @@ public class AppointmentController {
     public ResponseEntity<Void> deleteAppointment(@PathVariable UUID id) {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/review")
+    public ResponseEntity<?> addReview(
+            @PathVariable UUID id,
+            @RequestParam("reviewText") String reviewText,
+            @RequestParam("rating") Integer rating,
+            @RequestParam("photo") MultipartFile photo) {
+
+        Optional<Appointment> optionalAppointment = appointmentService.getAppointmentById(id);
+        if (optionalAppointment.isPresent()) {
+            Appointment appointment = optionalAppointment.get();
+
+            Review review = new Review();
+            review.setReviewText(reviewText);
+            review.setRating(rating);
+
+            try {
+                review.setCustomerPhoto(photo.getBytes());
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading photo.");
+            }
+
+            appointment.setReview(review); // Asocia la reseña con el appointment
+
+            // Convertir los valores para llamar correctamente a createAppointment()
+            List<UUID> variantUUIDs = appointment.getServiceVariantIds().stream()
+                    .map(UUID::fromString)
+                    .collect(Collectors.toList());
+
+            appointmentService.createAppointment(
+                    appointment.getCustomerEmail(),
+                    appointment.getServiceName(),
+                    variantUUIDs,
+                    appointment.getAppointmentDate().toString(),
+                    appointment.getAppointmentTime().toString(),
+                    appointment.getTotalCost(),
+                    // Si el método ya no necesita AppointmentStatus, elimínalo de la definición
+                    AppointmentStatus.COMPLETED, // Si el status es necesario
+                    appointment.getImagePath() // Asegúrate de que sea un String, no un Review
+            );
+
+            return ResponseEntity.ok("Review and photo added successfully.");
+        }
+        return ResponseEntity.badRequest().body("Appointment not found.");
     }
 }
 

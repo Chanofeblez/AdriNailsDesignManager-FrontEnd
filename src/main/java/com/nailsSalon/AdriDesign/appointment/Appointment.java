@@ -1,6 +1,7 @@
 package com.nailsSalon.AdriDesign.appointment;
 
 
+import com.nailsSalon.AdriDesign.review.Review;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -52,6 +53,11 @@ public class Appointment {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "review_id", referencedColumnName = "id")
+    private Review review; // Relación con la entidad Review
+
 
     // Método que se ejecuta antes de guardar un nuevo registro
     @PrePersist

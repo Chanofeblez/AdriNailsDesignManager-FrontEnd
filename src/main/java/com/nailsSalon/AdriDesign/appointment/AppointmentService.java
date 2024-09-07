@@ -8,6 +8,7 @@ import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
 import com.nailsSalon.AdriDesign.payment.PaymentController;
 import com.nailsSalon.AdriDesign.reservedslot.ReservedSlot;
 import com.nailsSalon.AdriDesign.reservedslot.ReservedSlotRepository;
+import com.nailsSalon.AdriDesign.reservedslot.ReservedSlotService;
 import com.nailsSalon.AdriDesign.servicio.Servicio;
 import com.nailsSalon.AdriDesign.servicio.ServicioRepository;
 import com.nailsSalon.AdriDesign.servicio.ServicioService;
@@ -29,6 +30,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
+
+    @Autowired
+    private ReservedSlotService reservedSlotService;
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
@@ -76,9 +80,7 @@ public class AppointmentService {
                 .map(UUID::toString)
                 .collect(Collectors.toList());
 
-        logger.info("antes de crear appointmet: {}", uuidStrings);
-        String timeString = time + ":00"; // convierte el número a "03:00"
-        logger.info("antes de crear appointmet: {}", timeString);
+        String timeString = time; // convierte el número a "03:00"
 
         // Asignar los valores
         appointment.setCustomerEmail(customerEmail);
@@ -129,6 +131,9 @@ public class AppointmentService {
                // appointment.setServiceVariants(serviceVariants);
             }
 
+            // Llama al método para liberar el slot
+            reservedSlotService.releaseSlot(appointment.getAppointmentDate(), appointment.getAppointmentTime());
+
             // Guardar y devolver la cita actualizada
             return appointmentRepository.save(appointment);
         }).orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id " + id));
@@ -148,9 +153,24 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id " + appointmentId));
 
+        logger.info("AppointmentStatus: {}", appointment.getStatus());
+        if ((appointment.getStatus() == AppointmentStatus.UPCOMING || appointment.getStatus() == AppointmentStatus.CONFIRMED
+           || appointment.getStatus() == AppointmentStatus.PENDING) && status == AppointmentStatus.CANCELED){
+            // Llama al método para liberar el slot
+            reservedSlotService.releaseSlot(appointment.getAppointmentDate(), appointment.getAppointmentTime());
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELED && status == AppointmentStatus.CONFIRMED){
+            // Llama al método para liberar el slot
+            ReservedSlot reservedSlot = new ReservedSlot();
+            reservedSlot.setDate(appointment.getAppointmentDate());
+            reservedSlot.setTime(appointment.getAppointmentTime());
+
+            reservedSlotRepository.save(reservedSlot);
+        }
+
         // Actualizar el estado
         appointment.setStatus(status);
-
 
         // Guardar la cita actualizada en la base de datos
         return appointmentRepository.save(appointment);

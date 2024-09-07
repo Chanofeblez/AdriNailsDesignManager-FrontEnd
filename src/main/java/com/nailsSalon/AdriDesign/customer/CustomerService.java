@@ -84,26 +84,33 @@ public class CustomerService {
     }
 
     public Customer updateCustomer(UUID id, Customer customerDetails) {
+
+        LOGGER.info("Update recibido ID{}", id);
+        LOGGER.info("Update recibido {}", customerDetails);
         // Verificar si existe miembro con ese id, si no, lanzar una excepción
         Customer customerExistente = customerRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Miembro con ese id no existe, id: " + id));
+        LOGGER.info("Id Verificado {}", customerDetails);
 
         // Verificar si el email es válido
         if (!checkValidezEmail(customerDetails.getEmail())) {
             throw new IllegalArgumentException("Email " + customerDetails.getEmail() + " no es válido");
         }
+        LOGGER.info("Email Valido Verificado {}", customerDetails);
 
         // Verificar si el email que se quiere actualizar ya existe
         if (!customerDetails.getEmail().equals(customerExistente.getEmail()) && customerRepository.existsByEmail(customerDetails.getEmail())) {
             throw new IllegalArgumentException("Email " + customerDetails.getEmail() + " ya está registrado.");
         }
+        LOGGER.info("Email Repetido Verificado {}", customerDetails);
 
         // Actualizar las propiedades del cliente
         customerExistente.setName(customerDetails.getName());
         customerExistente.setEmail(customerDetails.getEmail());
-        customerExistente.setPassword(customerDetails.getPassword());
+        //customerExistente.setPassword(customerDetails.getPassword());
         customerExistente.setPhoneNumber(customerDetails.getPhoneNumber());
         customerExistente.setUpdatedAt(LocalDateTime.now());
+        LOGGER.info("Customer Updated {}", customerDetails);
 
         return customerRepository.save(customerExistente);
     }
