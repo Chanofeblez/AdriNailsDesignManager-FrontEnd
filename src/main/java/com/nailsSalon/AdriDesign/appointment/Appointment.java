@@ -1,9 +1,11 @@
 package com.nailsSalon.AdriDesign.appointment;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.nailsSalon.AdriDesign.review.Review;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -54,9 +56,10 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "review_id", referencedColumnName = "id")
-    private Review review; // Relación con la entidad Review
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    @ToString.Exclude  // Evitar recursión infinita en el método toString()
+    @JsonManagedReference  // Evitar problemas de serialización cíclica
+    private Review review;
 
 
     // Método que se ejecuta antes de guardar un nuevo registro

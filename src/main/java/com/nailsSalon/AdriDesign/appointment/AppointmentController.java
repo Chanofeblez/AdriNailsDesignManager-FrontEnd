@@ -4,6 +4,7 @@ import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
 import com.nailsSalon.AdriDesign.payment.PaymentController;
 import com.nailsSalon.AdriDesign.review.Review;
+import com.nailsSalon.AdriDesign.review.ReviewRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,13 +25,16 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:8100")
 public class AppointmentController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentController.class);
 
     private final AppointmentService appointmentService;
 
+    private final ReviewRepository reviewRepository;
+
     @Autowired
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, ReviewRepository reviewRepository) {
         this.appointmentService = appointmentService;
+        this.reviewRepository = reviewRepository;
     }
 
     @GetMapping
@@ -124,40 +128,58 @@ public class AppointmentController {
             @RequestParam("rating") Integer rating,
             @RequestParam("photo") MultipartFile photo) {
 
+        System.out.println("Dentro del review");
         Optional<Appointment> optionalAppointment = appointmentService.getAppointmentById(id);
+        logger.info("optionalAppointment: {}", optionalAppointment);
         if (optionalAppointment.isPresent()) {
             Appointment appointment = optionalAppointment.get();
 
+            System.out.println("Creando el review");
             Review review = new Review();
             review.setReviewText(reviewText);
             review.setRating(rating);
 
+
+            System.out.println("Antes del try");
             try {
-                review.setCustomerPhoto(photo.getBytes());
+                // Manejo del archivo de imagen
+                if (photo != null && !photo.isEmpty()) {
+                    System.out.println("Dentro del try y el if");
+
+                    // Convertir archivo a byte[] y almacenar en el objeto Review
+                    byte[] fileBytes = photo.getBytes();
+
+                    // Verificación de datos y guardado temporal solo para depuración
+                    System.out.println("Tamaño del archivo en bytes: " + fileBytes.length);
+                    System.out.println("Primeros 100 bytes: " + Arrays.toString(Arrays.copyOf(fileBytes, 100)));
+
+                    // Guardar temporalmente en el sistema de archivos
+                    Path path = Paths.get("C:\\Users\\jfern\\Documents" + photo.getOriginalFilename());
+                    Files.write(path, fileBytes);
+                    System.out.println("Archivo guardado temporalmente en: " + path.toString());
+
+                    // Almacenar la foto como byte[]
+                    review.setCustomerPhoto(fileBytes);
+                } else {
+                    System.out.println("ERROR - BAD_REQUEST).body(Photo is missing or invalid.)");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Photo is missing or invalid.");
+                }
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading photo.");
             }
-
+            System.out.println("Antes del saveRepository");
+            // Guardar la review primero
+            review = reviewRepository.save(review);
+            logger.info("Review guardada: {}", review);
+            System.out.println("Insert appointment.setReview(review)");
             appointment.setReview(review); // Asocia la reseña con el appointment
+            review.setAppointment(appointment);
+            System.out.println("hasta el setreview del appointment");
 
-            // Convertir los valores para llamar correctamente a createAppointment()
-            List<UUID> variantUUIDs = appointment.getServiceVariantIds().stream()
-                    .map(UUID::fromString)
-                    .collect(Collectors.toList());
-
-            appointmentService.createAppointment(
-                    appointment.getCustomerEmail(),
-                    appointment.getServiceName(),
-                    variantUUIDs,
-                    appointment.getAppointmentDate().toString(),
-                    appointment.getAppointmentTime().toString(),
-                    appointment.getTotalCost(),
-                    // Si el método ya no necesita AppointmentStatus, elimínalo de la definición
-                    AppointmentStatus.COMPLETED, // Si el status es necesario
-                    appointment.getImagePath() // Asegúrate de que sea un String, no un Review
-            );
-
-            return ResponseEntity.ok("Review and photo added successfully.");
+            // Actualizar appointment con la nueva review
+            appointmentService.saveAppointment(appointment);
+            System.out.println("Saved");
+            return ResponseEntity.ok(Map.of("message", "Review and photo added successfully."));
         }
         return ResponseEntity.badRequest().body("Appointment not found.");
     }

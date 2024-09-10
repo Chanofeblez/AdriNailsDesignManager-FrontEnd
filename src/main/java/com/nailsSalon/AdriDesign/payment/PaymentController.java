@@ -54,10 +54,10 @@ public class PaymentController {
             );
             return ResponseEntity.ok(payment);
         } catch (ApiException e) {
-            logger.error("Error processing payment: " + e.getErrors());
+
             return ResponseEntity.status(e.getResponseCode()).body(e.getErrors());
         } catch (IOException e) {
-            logger.error("Network error while processing payment", e);
+
             return ResponseEntity.status(500).body("Payment processing failed due to a network error.");
         }
     }

@@ -1,27 +1,23 @@
 package com.nailsSalon.AdriDesign.appointment;
 
-import com.nailsSalon.AdriDesign.customer.Customer;
 import com.nailsSalon.AdriDesign.customer.CustomerRepository;
-import com.nailsSalon.AdriDesign.customer.CustomerService;
 import com.nailsSalon.AdriDesign.dto.AppointmentRequestDTO;
 import com.nailsSalon.AdriDesign.exception.ResourceNotFoundException;
-import com.nailsSalon.AdriDesign.payment.PaymentController;
 import com.nailsSalon.AdriDesign.reservedslot.ReservedSlot;
 import com.nailsSalon.AdriDesign.reservedslot.ReservedSlotRepository;
 import com.nailsSalon.AdriDesign.reservedslot.ReservedSlotService;
 import com.nailsSalon.AdriDesign.servicio.Servicio;
 import com.nailsSalon.AdriDesign.servicio.ServicioRepository;
-import com.nailsSalon.AdriDesign.servicio.ServicioService;
 import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariant;
 import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariantRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +30,7 @@ public class AppointmentService {
     @Autowired
     private ReservedSlotService reservedSlotService;
 
-    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
 
     private final AppointmentRepository appointmentRepository;
     private final CustomerRepository customerRepository;
@@ -65,6 +61,8 @@ public class AppointmentService {
 
     public List<Appointment> getAppointmentsByUserId(String userId) {
         logger.info("user2", userId);
+        List<Appointment> appointmentResp = appointmentRepository.findByCustomerEmail(userId);
+        logger.info("appointmentResp: {}", appointmentResp);
         return appointmentRepository.findByCustomerEmail(userId);
     }
 
@@ -176,5 +174,16 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    @Transactional
+    public Appointment saveAppointment(Appointment appointment) {
+        System.out.println("Dentro del servicio");
+        logger.info("AppointmentInService: {}", appointment.getId());
+        logger.info("AppointmentInService: {}", appointment.getServiceName());
 
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        logger.info("Appointment saved successfully: {}", savedAppointment.getId());
+
+        return savedAppointment;
+    }
 }

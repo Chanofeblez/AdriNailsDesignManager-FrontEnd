@@ -20,7 +20,7 @@ import java.util.*;
 public class CustomerController {
 
     private final CustomerService customerService;
-    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
     private JwtUtils jwtUtils;
 
     @Autowired
