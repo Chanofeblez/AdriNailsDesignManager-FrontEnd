@@ -167,18 +167,16 @@ public class AppointmentController {
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading photo.");
             }
-            System.out.println("Antes del saveRepository");
-            // Guardar la review primero
-            review = reviewRepository.save(review);
-            logger.info("Review guardada: {}", review);
-            System.out.println("Insert appointment.setReview(review)");
-            appointment.setReview(review); // Asocia la reseña con el appointment
+            // Asocia la review con el appointment
+            System.out.println("Asociando review con appointment");
             review.setAppointment(appointment);
-            System.out.println("hasta el setreview del appointment");
+            appointment.setReview(review);
 
-            // Actualizar appointment con la nueva review
-            appointmentService.saveAppointment(appointment);
-            System.out.println("Saved");
+            System.out.println("Guardando ambos (appointment y review)");
+            // Ahora guarda tanto el appointment como el review juntos
+            appointmentService.saveAppointment(appointment);  // Esto debería guardar tanto la review como el appointment
+
+            System.out.println("Guardado exitoso");
             return ResponseEntity.ok(Map.of("message", "Review and photo added successfully."));
         }
         return ResponseEntity.badRequest().body("Appointment not found.");
