@@ -19,8 +19,8 @@ public class AdriDesignApplication {
 		if (port != null && !port.isEmpty()) {
 			props.put("server.port", port);
 		} else {
-			// Si no está en un entorno como Heroku, usa el puerto por defecto (8080)
-			props.put("server.port", "8080");
+			// Si no está en un entorno como Heroku, usa el puerto por defecto (8081)
+			props.put("server.port", "8081");
 		}
 
 		app.setDefaultProperties(props);
