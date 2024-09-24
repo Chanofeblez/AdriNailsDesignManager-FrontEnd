@@ -45,7 +45,7 @@ public class Servicio {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "service_variant_mapping",
             joinColumns = @JoinColumn(name = "service_id"),

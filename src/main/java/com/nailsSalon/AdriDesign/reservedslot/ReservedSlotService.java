@@ -45,5 +45,11 @@ public class ReservedSlotService {
         }
     }
 
+    // Nuevo método para verificar si un slot está disponible
+    public boolean isSlotAvailable(LocalDate date, LocalTime time) {
+        List<ReservedSlot> reservedSlots = reservedSlotRepository.findByDateAndTime(date, time);
+        return reservedSlots.isEmpty();
+    }
+
 }
 

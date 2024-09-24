@@ -65,4 +65,13 @@ public class ReservedSlotController {
 
         return ResponseEntity.ok("Slot reservado con éxito");
     }
+
+    @GetMapping("/check")
+    public ResponseEntity<Boolean> checkSlotAvailability(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time) {
+
+        boolean isAvailable = reservedSlotService.isSlotAvailable(date, time);
+        return ResponseEntity.ok(isAvailable);
+    }
 }
