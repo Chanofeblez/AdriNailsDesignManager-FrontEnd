@@ -1,6 +1,7 @@
 package com.nailsSalon.AdriDesign.payment;
 
 import com.nailsSalon.AdriDesign.appointment.Appointment;
+import com.nailsSalon.AdriDesign.course.Course;
 import com.nailsSalon.AdriDesign.customer.Customer;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -22,8 +23,12 @@ public class SalonPayment {
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_id", nullable = false)
+    @JoinColumn(name = "appointment_id", nullable = true)
     private Appointment appointment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = true)
+    private Course course; // Para pagos de cursos
 
     @Column(nullable = false)
     private String paymentMethodId;
@@ -45,12 +50,23 @@ public class SalonPayment {
     private LocalDateTime updatedAt;
 
     // Constructor por defecto
+    // Constructor por defecto
     public SalonPayment() {}
 
-    // Constructor con parámetros (si lo necesitas)
+    // Constructor para pagos de citas (Appointment)
     public SalonPayment(Customer customer, Appointment appointment, String paymentMethodId, Long amount, String currency, PaymentStatus status) {
         this.customer = customer;
         this.appointment = appointment;
+        this.paymentMethodId = paymentMethodId;
+        this.amount = amount;
+        this.currency = currency;
+        this.status = status;
+    }
+
+    // Constructor para pagos de cursos (Course)
+    public SalonPayment(Customer customer, Course course, String paymentMethodId, Long amount, String currency, PaymentStatus status) {
+        this.customer = customer;
+        this.course = course;
         this.paymentMethodId = paymentMethodId;
         this.amount = amount;
         this.currency = currency;

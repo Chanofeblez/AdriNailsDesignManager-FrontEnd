@@ -2,6 +2,8 @@ package com.nailsSalon.AdriDesign.payment;
 
 import com.nailsSalon.AdriDesign.appointment.Appointment;
 import com.nailsSalon.AdriDesign.appointment.AppointmentRepository;
+import com.nailsSalon.AdriDesign.course.Course;
+import com.nailsSalon.AdriDesign.course.CourseRepository;
 import com.nailsSalon.AdriDesign.customer.CustomerRepository;
 import com.squareup.square.Environment;
 import com.squareup.square.SquareClient;
@@ -25,12 +27,14 @@ public class SquarePaymentService {
     private final CustomerRepository customerRepository;
     private final AppointmentRepository appointmentRepository;
     private final SalonPaymentRepository salonPaymentRepository;
+    private final CourseRepository courseRepository;
 
     @Autowired
     public SquarePaymentService(@Value("${square.access.token}") String accessToken,
                                 CustomerRepository customerRepository,
                                 AppointmentRepository appointmentRepository,
-                                SalonPaymentRepository salonPaymentRepository) {
+                                SalonPaymentRepository salonPaymentRepository,
+                                CourseRepository courseRepository) {
         this.squareClient = new SquareClient.Builder()
                 .accessToken(accessToken)
                 .environment(Environment.SANDBOX) // Cambia a "production" para producción
@@ -38,13 +42,14 @@ public class SquarePaymentService {
         this.customerRepository = customerRepository;
         this.appointmentRepository = appointmentRepository;
         this.salonPaymentRepository = salonPaymentRepository;
+        this.courseRepository = courseRepository;
     }
 
     public SquareClient getSquareClient() {
         return squareClient;
     }
 
-    public SalonPayment createPayment(String sourceId, String idempotencyKey, Money amountMoney, String customerId, String locationId, UUID appointmentId) throws ApiException, IOException {
+    public SalonPayment createAppointmentPayment(String sourceId, String idempotencyKey, Money amountMoney, String customerId, String locationId, UUID appointmentId) throws ApiException, IOException {
         PaymentsApi paymentsApi = squareClient.getPaymentsApi();
 
         CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(sourceId, idempotencyKey)
@@ -74,6 +79,41 @@ public class SquarePaymentService {
 
         return salonPaymentRepository.save(salonPayment);
     }
+
+    public SalonPayment createCoursePayment(String sourceId, String idempotencyKey, Money amountMoney, String customerId, String locationId, UUID courseId) throws ApiException, IOException {
+        PaymentsApi paymentsApi = squareClient.getPaymentsApi();
+
+        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(sourceId, idempotencyKey)
+                .amountMoney(amountMoney)
+                .autocomplete(true)
+                .customerId(customerId)
+                .locationId(locationId)
+                .referenceId("123456")
+                .build();
+
+        com.squareup.square.models.Payment squarePayment = paymentsApi.createPayment(createPaymentRequest).getPayment();
+
+        // Cargar el objeto Customer desde la base de datos
+        Customer customer = customerRepository.findById(UUID.fromString(customerId))
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+
+        // Cargar el Curso desde la base de datos
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+        // Utilizar el constructor para crear el SalonPayment
+        SalonPayment salonPayment = new SalonPayment(
+                customer,
+                course,
+                sourceId,
+                amountMoney.getAmount(),
+                amountMoney.getCurrency(),
+                SalonPayment.PaymentStatus.COMPLETED
+        );
+
+        return salonPaymentRepository.save(salonPayment);
+    }
+
 
 }
 

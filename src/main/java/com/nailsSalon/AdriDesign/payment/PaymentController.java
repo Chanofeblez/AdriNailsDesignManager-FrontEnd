@@ -48,7 +48,7 @@ public class PaymentController {
 
             String idempotencyKey = UUID.randomUUID().toString();
 
-            SalonPayment payment = squarePaymentService.createPayment(
+            SalonPayment payment = squarePaymentService.createAppointmentPayment(
                     paymentRequest.getSourceId(),
                     idempotencyKey,
                     amountMoney,
@@ -82,7 +82,7 @@ public class PaymentController {
 
             String idempotencyKey = UUID.randomUUID().toString();
 
-            SalonPayment payment = squarePaymentService.createPayment(
+            SalonPayment payment = squarePaymentService.createCoursePayment(
                     paymentRequest.getSourceId(),
                     idempotencyKey,
                     amountMoney,
