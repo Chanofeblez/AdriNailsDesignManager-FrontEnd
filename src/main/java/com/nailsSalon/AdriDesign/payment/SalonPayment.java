@@ -1,5 +1,6 @@
 package com.nailsSalon.AdriDesign.payment;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.nailsSalon.AdriDesign.appointment.Appointment;
 import com.nailsSalon.AdriDesign.course.Course;
 import com.nailsSalon.AdriDesign.customer.Customer;
@@ -20,14 +21,17 @@ public class SalonPayment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
+    @JsonBackReference // Evita la serialización recursiva hacia Customer
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id", nullable = true)
+    @JsonBackReference // Evita la serialización recursiva hacia Appointment
     private Appointment appointment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = true)
+    @JsonBackReference // Evita la serialización recursiva hacia Course
     private Course course; // Para pagos de cursos
 
     @Column(nullable = false)

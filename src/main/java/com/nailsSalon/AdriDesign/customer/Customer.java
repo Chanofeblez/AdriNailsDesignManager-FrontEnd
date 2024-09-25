@@ -1,5 +1,7 @@
 package com.nailsSalon.AdriDesign.customer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.nailsSalon.AdriDesign.appointment.Appointment;
 import com.nailsSalon.AdriDesign.payment.SalonPayment;
 import com.squareup.square.models.Payment;
@@ -46,6 +48,7 @@ public class Customer {
     //private List<Appointment> appointments = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Rompe la recursividad para la relación con SalonPayment
     private List<SalonPayment> payments = new ArrayList<>();
 
     private String paymentMethodId;
