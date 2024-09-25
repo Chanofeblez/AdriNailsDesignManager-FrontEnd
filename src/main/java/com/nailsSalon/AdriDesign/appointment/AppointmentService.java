@@ -189,7 +189,7 @@ public class AppointmentService {
 
     public boolean verifyPayment(UUID appointmentId, UUID userId) {
         // Buscar el appointment por su ID y el ID del usuario
-        Optional<Appointment> appointment = appointmentRepository.findByIdAndUserId(appointmentId, userId);
+       // Optional<Appointment> appointment = appointmentRepository.findByIdAndUserId(appointmentId, userId);
 
         // Verificar si la cita existe y si el estado del pago es "pagado"
        // if (appointment.isPresent() && appointment.get().getPaymentStatus().equals("PAID")) {

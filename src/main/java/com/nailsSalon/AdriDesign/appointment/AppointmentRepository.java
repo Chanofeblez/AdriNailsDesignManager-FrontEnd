@@ -23,7 +23,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     // Encuentra todas las citas confirmadas
     List<Appointment> findByStatus(AppointmentStatus status);
 
-    Optional<Appointment> findByIdAndUserId(UUID appointmentId, UUID userId);
+    //Optional<Appointment> findByIdAndUserId(UUID appointmentId, UUID userId);
 
 
 
