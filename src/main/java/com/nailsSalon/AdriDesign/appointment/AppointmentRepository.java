@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -21,6 +22,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     // Encuentra todas las citas confirmadas
     List<Appointment> findByStatus(AppointmentStatus status);
+
+    Optional<Appointment> findByIdAndUserId(UUID appointmentId, UUID userId);
+
 
 
 }

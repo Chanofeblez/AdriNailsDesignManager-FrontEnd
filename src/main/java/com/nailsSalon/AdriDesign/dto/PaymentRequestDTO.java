@@ -17,6 +17,7 @@ public class PaymentRequestDTO {
     private String customerId; // ID del cliente
     private String locationId; // ID de la ubicación de Square
     private UUID appointmentId; // ID de la cita relacionada con el pago
+    private UUID courseId;        // ID del curso relacionado con el pago
 
     // Getters y Setters
 
@@ -58,6 +59,14 @@ public class PaymentRequestDTO {
 
     public void setAppointmentId(UUID appointmentId) {
         this.appointmentId = appointmentId;
+    }
+
+    public UUID getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(UUID courseId) {
+        this.courseId = courseId;
     }
 }
 

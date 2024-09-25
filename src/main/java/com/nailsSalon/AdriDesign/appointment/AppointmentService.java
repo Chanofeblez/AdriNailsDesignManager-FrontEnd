@@ -186,4 +186,16 @@ public class AppointmentService {
 
         return savedAppointment;
     }
+
+    public boolean verifyPayment(UUID appointmentId, UUID userId) {
+        // Buscar el appointment por su ID y el ID del usuario
+        Optional<Appointment> appointment = appointmentRepository.findByIdAndUserId(appointmentId, userId);
+
+        // Verificar si la cita existe y si el estado del pago es "pagado"
+       // if (appointment.isPresent() && appointment.get().getPaymentStatus().equals("PAID")) {
+       //     return true;  // Si ha sido pagado, devuelve true
+       // }
+
+        return false;  // Si no ha sido pagado o no existe, devuelve false
+    }
 }
