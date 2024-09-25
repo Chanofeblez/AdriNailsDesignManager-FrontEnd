@@ -83,8 +83,9 @@ public class SalonPayment {
         this.createdAt = LocalDateTime.now();
     }
 
+    @PrePersist
     @PreUpdate
-    protected void onUpdate() {
+    public void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
     }
 }
