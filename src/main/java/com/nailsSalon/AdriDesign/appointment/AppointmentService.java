@@ -13,12 +13,14 @@ import com.nailsSalon.AdriDesign.serviciovariant.ServicioVariantRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -198,4 +200,27 @@ public class AppointmentService {
 
         return false;  // Si no ha sido pagado o no existe, devuelve false
     }
+
+     @Scheduled(cron = "0 0 0 * * ?")  // Ejecuta la tarea todos los días a la medianoche
+     public void updateAppointmentsStatusToCompletedScheduler() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+        List<Appointment> updatedAppointments = new ArrayList<>();
+
+        LocalDate currentDate = LocalDate.now();
+
+        for (Appointment appointment : appointments) {
+            if (appointment.getStatus() != AppointmentStatus.COMPLETED &&
+                    appointment.getStatus() != AppointmentStatus.CANCELED &&
+                    appointment.getAppointmentDate().isBefore(currentDate)) {
+
+                // Cambiar el estado a COMPLETED si la fecha ya ha pasado
+                appointment.setStatus(AppointmentStatus.COMPLETED);
+                updatedAppointments.add(appointment);
+            }
+        }
+        if (!updatedAppointments.isEmpty()) {
+            appointmentRepository.saveAll(updatedAppointments);
+        }
+     }
+
 }
