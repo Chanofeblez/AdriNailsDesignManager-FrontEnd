@@ -37,6 +37,11 @@ public class ServicioVariantController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/by-ids")
+    public List<ServicioVariant> getServiceVariantsByIds(@RequestBody List<UUID> ids) {
+        return serviceVariantService.getServiceVariantsByIds(ids);
+    }
+
     @PostMapping
     public ServicioVariant createServiceVariant(@RequestBody ServicioVariant serviceVariant) {
         LOGGER.info("Creando ServicioVariant {}", serviceVariant);

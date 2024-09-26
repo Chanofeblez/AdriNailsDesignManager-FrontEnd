@@ -30,6 +30,10 @@ public class ServicioVariantService {
         return serviceVariantRepository.findById(id);
     }
 
+    public List<ServicioVariant> getServiceVariantsByIds(List<UUID> ids) {
+        return serviceVariantRepository.findAllById(ids);
+    }
+
     public ServicioVariant createServiceVariant(ServicioVariant serviceVariant) {
         LOGGER.info("Creando ServicioVariant {}", serviceVariant);
         return serviceVariantRepository.save(serviceVariant);
