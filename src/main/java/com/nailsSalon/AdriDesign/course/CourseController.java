@@ -4,7 +4,9 @@ import com.nailsSalon.AdriDesign.video.Video;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,10 +18,42 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
+    // Crear un curso con posibilidad de subir imagen y PDF
     @PostMapping
-    public Course createCourse(@RequestBody Course course) {
-        return courseService.createCourse(course);
+    public Course createCourse(
+            @RequestPart("course") Course course,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "pdf", required = false) MultipartFile pdf,
+            @RequestPart(value = "videos", required = false) List<MultipartFile> videos) {
+
+        // Subir y almacenar la imagen
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = courseService.uploadFile(image);  // Servicio para manejar la subida
+            course.setImageUrl(imageUrl);  // Guarda la URL de la imagen en el curso
+        }
+
+        // Subir y almacenar el PDF
+        if (pdf != null && !pdf.isEmpty()) {
+            String pdfUrl = courseService.uploadFile(pdf);  // Servicio para manejar la subida
+            course.setPdfUrl(pdfUrl);  // Guarda la URL del PDF en el curso
+        }
+
+        // Subir y almacenar los videos
+        if (videos != null && !videos.isEmpty()) {
+            List<Video> videoEntities = new ArrayList<>();
+            for (MultipartFile videoFile : videos) {
+                String videoUrl = courseService.uploadFile(videoFile);  // Servicio para manejar la subida de cada video
+                Video video = new Video();  // Suponiendo que tienes una entidad `Video`
+                video.setUrl(videoUrl);
+                video.setCourse(course);  // Establece la relación entre el video y el curso
+                videoEntities.add(video);  // Agrega el video a la lista de videos
+            }
+            course.setVideos(videoEntities);  // Asigna la lista de videos al curso
+        }
+
+        return courseService.createCourse(course);  // Guarda el curso con los videos, imagen y PDF
     }
+
 
     @GetMapping
     public List<Course> getAllCourses() {
@@ -42,11 +76,30 @@ public class CourseController {
         }
     }
 
+    // Actualizar un curso (puede incluir nueva imagen o PDF)
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(@PathVariable UUID id, @RequestBody Course course) {
+    public ResponseEntity<Course> updateCourse(
+            @PathVariable UUID id,
+            @RequestPart("course") Course course,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "pdf", required = false) MultipartFile pdf) {
+
         Optional<Course> existingCourse = courseService.getCourseById(id);
         if (existingCourse.isPresent()) {
-            course.setId(id);
+
+            // Subir nueva imagen si se proporciona
+            if (image != null && !image.isEmpty()) {
+                String imageUrl = courseService.uploadFile(image);
+                course.setImageUrl(imageUrl);
+            }
+
+            // Subir nuevo PDF si se proporciona
+            if (pdf != null && !pdf.isEmpty()) {
+                String pdfUrl = courseService.uploadFile(pdf);
+                course.setPdfUrl(pdfUrl);
+            }
+
+            course.setId(id);  // Asegurar que estamos actualizando el curso correcto
             return ResponseEntity.ok(courseService.updateCourse(course));
         } else {
             return ResponseEntity.notFound().build();
