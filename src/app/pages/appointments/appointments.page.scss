@@ -1,0 +1,33 @@
+/*
+  Authors : initappz (Rahul Jograna)
+  Website : https://initappz.com/
+  App Name : Salon - 2 This App Template Source code is licensed as per the
+  terms found in the Website https://initappz.com/license
+  Copyright and Good Faith Purchasers © 2023-present initappz.
+*/
+.content {
+  padding: 5px;  // Ajusta el padding general para crear espacio dentro del contenedor
+}
+
+ion-label.name {
+  display: block;
+  margin-bottom: 3px;  // Espacio entre los nombres
+}
+
+.service-name {
+  margin-bottom: 3px;  // Espacio entre el precio y otros elementos
+}
+
+.date {
+  display: flex;  // Alinea el ícono y la fecha horizontalmente
+  align-items: center;
+  margin-top: 3px;  // Ajusta el margen superior para darle más espacio entre la fecha y el elemento anterior
+}
+
+.appointment-screen {
+  padding-bottom: 80px;  // Ajusta este valor según el tamaño del footer
+}
+
+
+
+
