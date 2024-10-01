@@ -46,4 +46,14 @@ public class ImageController {
         List<Image> imagenes = imageService.getAllImages();
         return ResponseEntity.ok(imagenes);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteImage(@PathVariable UUID id) {
+        boolean isRemoved = imageService.deleteImageById(id);
+        if (!isRemoved) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 }

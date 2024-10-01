@@ -25,4 +25,13 @@ public class ImageService {
     public List<Image> getAllImages() {
         return imageRepository.findAll();
     }
+
+    public boolean deleteImageById(UUID id) {
+        if (imageRepository.existsById(id)) {
+            imageRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
 }
