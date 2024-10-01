@@ -31,6 +31,10 @@ export class AppointmentService {
     return this.http.get<Appointment>(`${this.apiUrl}/${id}`);
   }
 
+  getAppointmentsByCustomerId(customerId: string): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.apiUrl}/user/${customerId}`);
+  }
+
   getUserAppointments(userId: string): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}/user/${userId}`);
   }

@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Customer Info</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngIf="customer">
+    <ion-card-header>
+      <ion-card-title>{{ customer.name }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Email:</strong> {{ customer.email }}</p>
+      <p><strong>Phone:</strong> {{ customer.phoneNumber }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list *ngIf="appointments.length > 0">
+    <ion-item *ngFor="let appointment of appointments">
+      <ion-label>
+        <h2>{{ appointment.serviceName }}</h2>
+        <p>{{ appointment.appointmentDate }} - {{ formatAppointmentTime(appointment.appointmentTime) }}</p>
+        <p><strong>Status:</strong> {{ appointment.status }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-text *ngIf="appointments.length === 0">
+    No appointments found for this customer.
+  </ion-text>
+</ion-content>
+

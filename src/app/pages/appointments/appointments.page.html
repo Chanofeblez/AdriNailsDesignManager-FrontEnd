@@ -17,11 +17,12 @@
       <ion-segment-button value="completed">
         <ion-label>Completed</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="review">
-        <ion-label>Reviews</ion-label>
+      <ion-segment-button value="customer">
+        <ion-label>Customers</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
+
 </ion-header>
 
 <ion-content class="ion-padding">
@@ -88,6 +89,20 @@
           </div>
         </ion-col>
       </ion-row>
+    </div>
+
+    <div class="list" *ngIf="currentSegment =='customer'">
+      <div class="navigations-button" *ngFor="let customer of customers">
+        <div class="item-content" (click)="goToCustomerInfo(customer)">
+          <div class="prefix">
+            <div class="icon-content" [style.background-color]="getColor(customer)">
+              <ion-icon name="person-outline" color="dark"></ion-icon>
+            </div>
+            <ion-label class="title">{{ customer.name }}</ion-label>
+          </div>
+          <ion-icon name="chevron-forward-outline" color="dark"></ion-icon>
+        </div>
+      </div>
     </div>
   </div>
 </ion-content>

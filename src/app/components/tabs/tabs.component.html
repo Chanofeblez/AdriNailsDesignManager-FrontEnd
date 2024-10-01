@@ -11,13 +11,13 @@
     <ion-icon name="reader" [ngClass]="navigation === 'appointments' ? 'active-icon' : 'simple-icon'"
               [color]="navigation === 'appointments' ? 'dark' : 'light'"></ion-icon>
   </div>
-  <div class="tab-data" (click)="onNavigate('home')">
-    <ion-icon name="home" [ngClass]="navigation === 'home' ? 'active-icon' : 'simple-icon'"
-              [color]="navigation === 'home' ? 'dark' : 'light'"></ion-icon>
+  <div class="tab-data" (click)="onNavigate('gallery')">
+    <ion-icon name="images-outline" [ngClass]="navigation === 'gallery' ? 'active-icon' : 'simple-icon'"
+              [color]="navigation === 'gallery' ? 'dark' : 'light'"></ion-icon>
   </div>
-  <div class="tab-data" (click)="onNavigate('near-by')">
-    <ion-icon name="location" [ngClass]="navigation === 'near-by' ? 'active-icon' : 'simple-icon'"
-              [color]="navigation === 'near-by' ? 'dark' : 'light'"></ion-icon>
+  <div class="tab-data" (click)="onNavigate('course')">
+    <ion-icon name="book-outline" [ngClass]="navigation === 'course' ? 'active-icon' : 'simple-icon'"
+              [color]="navigation === 'course' ? 'dark' : 'light'"></ion-icon>
   </div>
   <div class="tab-data" (click)="onNavigate('chats')">
     <ion-icon name="chatbubble-ellipses" [ngClass]="navigation === 'chats' ? 'active-icon' : 'simple-icon'"

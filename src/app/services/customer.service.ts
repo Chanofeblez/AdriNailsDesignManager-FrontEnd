@@ -26,4 +26,9 @@ export class CustomerService {
   getCustomerByEmail(customerEmail: string): Observable<CustomerInterface> {
     return this.http.get<CustomerInterface>(`${this.apiUrl}/by-email?email=${customerEmail}`);
   }
+
+  getAllCustomers(): Observable<CustomerInterface[]> {
+    return this.http.get<CustomerInterface[]>(`${this.apiUrl}`);
+  }
+
 }

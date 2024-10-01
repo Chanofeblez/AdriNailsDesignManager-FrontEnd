@@ -114,6 +114,18 @@ const routes: Routes = [
     path: 'write-reviews',
     loadChildren: () => import('./pages/write-reviews/write-reviews.module').then(m => m.WriteReviewsPageModule)
   },
+  {
+    path: 'gallery',
+    loadChildren: () => import('./pages/gallery/gallery.module').then( m => m.GalleryPageModule)
+  },
+  {
+    path: 'course',
+    loadChildren: () => import('./pages/course/course.module').then( m => m.CoursePageModule)
+  },
+  {
+    path: 'customer-info/:id',
+    loadChildren: () => import('./pages/customer-info/customer-info.module').then( m => m.CustomerInfoPageModule)
+  },
 ];
 
 @NgModule({

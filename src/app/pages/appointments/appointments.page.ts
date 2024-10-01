@@ -25,6 +25,9 @@ export class AppointmentsPage implements OnInit {
   appointments : Appointment[] = [];
   completedAppointments : Appointment[] = [];
   customerNames: { [key: string]: string } = {};  // Objeto para almacenar los nombres de los clientes
+  customers: CustomerInterface[] = [];
+
+
 
   private appointmentService = inject(AppointmentService);
   private customerService = inject(CustomerService);
@@ -39,6 +42,7 @@ export class AppointmentsPage implements OnInit {
 
   ngOnInit() {
     this.loadAppointments();
+    this.loadCustomers();
   }
 
   // Método para cargar los appointments y los nombres de los clientes
@@ -159,6 +163,23 @@ private updateAppointmentStatus(appointment: Appointment): Promise<void> {
     }
   }
 
+  loadCustomers() {
+    this.customerService.getAllCustomers().subscribe(
+      (customers: CustomerInterface[]) => {
+        this.customers = customers;
+      },
+      (error) => {
+        console.error('Error al cargar los clientes', error);
+      }
+    );
+  }
+
+  getColor(customer: CustomerInterface): string {
+    const colors = ['#61BFBE', '#E0C4F7', '#FCC4B3', '#FFD700', '#FFB6C1', '#87CEFA']; // Puedes agregar más colores si lo deseas
+    const index = this.customers.indexOf(customer) % colors.length;
+    return colors[index];
+  }
+
 
   onInfo(appointment: Appointment) {
     console.log("appointment", appointment);
@@ -166,6 +187,9 @@ private updateAppointmentStatus(appointment: Appointment): Promise<void> {
     this.router.navigate([`/booking-info`, appointment.id]);  // Navegar a booking-info pasando el ID
   }
 
+  goToCustomerInfo(customer: CustomerInterface) {
+    this.router.navigate(['/customer-info', customer.id]);
+  }
 
 
 }
