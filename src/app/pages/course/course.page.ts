@@ -55,6 +55,7 @@ export class CoursePage implements OnInit {
       formData.append('videos', video);
     });
 
+    console.log("formData",formData);
     this.courseService.createCourse(formData).subscribe(response => {
       console.log('Course created successfully', response);
     });
