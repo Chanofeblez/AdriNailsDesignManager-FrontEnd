@@ -73,5 +73,21 @@ export class CustomerInfoPage implements OnInit {
     return `${hours12}:${minutes.toString().padStart(2, '0')} ${suffix}`; // Formatea la salida
   }
 
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'PENDING':
+        return 'orange';
+      case 'CONFIRMED':
+        return 'blue';
+      case 'COMPLETED':
+        return 'green';
+      case 'CANCELED':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  }
+
+
 
 }
