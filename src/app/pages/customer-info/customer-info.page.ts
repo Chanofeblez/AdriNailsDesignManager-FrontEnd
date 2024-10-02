@@ -22,12 +22,21 @@ export class CustomerInfoPage implements OnInit {
 
   ngOnInit() {
     const customerId = this.route.snapshot.paramMap.get('id');
+    const customerEmail = this.route.snapshot.paramMap.get('email');
+
     if (customerId) {
-      console.log("customerId",customerId);
+      console.log('customerId:', customerId);
+      console.log('Customer Email:', customerEmail);
+
       this.loadCustomerInfo(customerId);
-      this.loadCustomerAppointments(customerId);
+
+      // Verificar si customerEmail no es null antes de pasarlo a loadCustomerAppointments
+      if (customerEmail) {
+        this.loadCustomerAppointments(customerEmail);
+      }
     }
   }
+
 
   loadCustomerInfo(customerId: string) {
     this.customerService.getCustomerById(customerId).subscribe(
@@ -41,8 +50,8 @@ export class CustomerInfoPage implements OnInit {
     );
   }
 
-  loadCustomerAppointments(customerId: string) {
-    this.appointmentService.getAppointmentsByCustomerId(customerId).subscribe(
+  loadCustomerAppointments(customerEmail: string) {
+    this.appointmentService.getAppointmentsByCustomerEmail(customerEmail).subscribe(
       (appointments) => {
         console.log("appointments", appointments); // Agrega este log para verificar los datos en el frontend
         // Ordenar appointments de más reciente a más antiguo

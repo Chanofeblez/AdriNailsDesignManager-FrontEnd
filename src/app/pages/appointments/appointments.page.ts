@@ -188,7 +188,7 @@ private updateAppointmentStatus(appointment: Appointment): Promise<void> {
   }
 
   goToCustomerInfo(customer: CustomerInterface) {
-    this.router.navigate(['/customer-info', customer.id]);
+    this.router.navigate(['/customer-info', customer.id, customer.email]);
   }
 
 

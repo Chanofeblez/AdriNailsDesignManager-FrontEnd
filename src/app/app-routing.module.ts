@@ -123,7 +123,7 @@ const routes: Routes = [
     loadChildren: () => import('./pages/course/course.module').then( m => m.CoursePageModule)
   },
   {
-    path: 'customer-info/:id',
+    path: 'customer-info/:id/:email',
     loadChildren: () => import('./pages/customer-info/customer-info.module').then( m => m.CustomerInfoPageModule)
   },
 ];
