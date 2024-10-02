@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
@@ -33,6 +34,8 @@ build/
 ### VS Code ###
 .vscode/
 =======
+=======
+>>>>>>> 93d2d93f0360a1014ed2c75cb7d2447464405e0d
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
@@ -103,4 +106,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+<<<<<<< HEAD
 >>>>>>> 93d2d93 (Creating Repository)
+=======
+>>>>>>> 93d2d93f0360a1014ed2c75cb7d2447464405e0d
