@@ -20,14 +20,16 @@ import { Router } from '@angular/router';
   templateUrl: './appointments.page.html',
   styleUrls: ['./appointments.page.scss'],
 })
-export class AppointmentsPage implements OnInit {
+export class AppointmentsPage {
 
   appointments : Appointment[] = [];
   completedAppointments : Appointment[] = [];
+  pendingAppointments: Appointment[] = [];
+  confirmedAppointments: Appointment[] = [];
   customerNames: { [key: string]: string } = {};  // Objeto para almacenar los nombres de los clientes
   customers: CustomerInterface[] = [];
-
-
+  filteredCompletedAppointments: Appointment[] = []; // Arreglo filtrado
+  selectedFilter: string = 'all'; // Filtro seleccionado
 
   private appointmentService = inject(AppointmentService);
   private customerService = inject(CustomerService);
@@ -36,73 +38,125 @@ export class AppointmentsPage implements OnInit {
   private router = inject(Router);
 
   currentSegment: any = 'upcoming';
-  constructor(
 
-  ) { }
+  constructor() { }
 
-  ngOnInit() {
+  ionViewWillEnter() {
+    console.log("ionViewWillEnter");
     this.loadAppointments();
     this.loadCustomers();
   }
 
+
   // Método para cargar los appointments y los nombres de los clientes
-loadAppointments() {
-  this.appointments = [];
-  this.completedAppointments = [];
+  loadAppointments() {
+    this.appointments = [];
+    this.completedAppointments = [];
+    this.pendingAppointments = [];
+    this.confirmedAppointments = [];
 
-  this.appointmentService.getAllAppointments().subscribe(
-    async (appointments: Appointment[]) => {
-      const currentDate = new Date();
+    this.appointmentService.getAllAppointments().subscribe(
+      async (appointments: Appointment[]) => {
+        const currentDate = new Date();
 
-      // Primero actualizamos el estado de los appointments pasados a 'COMPLETED'
-      for (const appointment of appointments) {
-        const appointmentDate = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+        // Actualizamos el estado de los appointments pasados a 'COMPLETED'
+        for (const appointment of appointments) {
+          const appointmentDate = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
 
-        // Si la fecha del appointment ya pasó y no está completado ni cancelado, actualizamos el status a 'COMPLETED'
-        if (appointmentDate < currentDate && appointment.status !== AppointmentStatus.COMPLETED && appointment.status !== AppointmentStatus.CANCELED) {
-          appointment.status = AppointmentStatus.COMPLETED;
-          await this.updateAppointmentStatus(appointment); // Método para actualizar el appointment
+          // Si la fecha del appointment ya pasó y no está completado ni cancelado, actualizamos el status a 'COMPLETED'
+          if (
+            appointmentDate < currentDate &&
+            appointment.status !== AppointmentStatus.COMPLETED &&
+            appointment.status !== AppointmentStatus.CANCELED
+          ) {
+            appointment.status = AppointmentStatus.COMPLETED;
+            await this.updateAppointmentStatus(appointment); // Método para actualizar el appointment
+          }
         }
-      }
 
-      // Luego filtramos los appointments que no están completados ni cancelados
-      const filteredAppointments = appointments.filter(appointment =>
-        appointment.status !== AppointmentStatus.COMPLETED && appointment.status !== AppointmentStatus.CANCELED
-      );
-
-      // Ordenar los appointments filtrados por fecha (appointmentDate)
-      const sortedAppointments = filteredAppointments.sort((a, b) => {
-        const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`).getTime();
-        const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`).getTime();
-        return dateA - dateB;
-      });
-
-      // Filtrar y ordenar los appointments con status 'COMPLETED'
-      const completedAppointments = appointments.filter(appointment => appointment.status === 'COMPLETED');
-
-      // Ordenar los appointments completados por fecha más reciente a más antigua
-      this.completedAppointments = completedAppointments.sort((a, b) => {
-        return new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime();
-      });
-
-
-      this.appointments = sortedAppointments;
-      console.log("this.appointments:", this.appointments);
-      console.log("Completed Appointments:", this.completedAppointments);
-
-      // Obtener el nombre de los clientes por email y almacenarlos en el objeto customerNames
-      for (const appointment of appointments) {
-        if (appointment.customerEmail) {
-          const nombre = await this.getNombre(appointment.customerEmail);
-          this.customerNames[appointment.customerEmail] = nombre || 'Desconocido'; // Asignar un valor predeterminado si getNombre() devuelve void
+        // Clasificar los appointments por su estado
+        for (const appointment of appointments) {
+          if (appointment.status === AppointmentStatus.COMPLETED) {
+            this.completedAppointments.push(appointment);
+          } else if (appointment.status === AppointmentStatus.CONFIRMED) {
+            this.confirmedAppointments.push(appointment);
+          } else if (appointment.status === AppointmentStatus.PENDING) {
+            this.pendingAppointments.push(appointment);
+          }
         }
+
+        // Ordenar los appointments pendientes y confirmados por fecha
+        this.pendingAppointments.sort((a, b) => {
+          const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`).getTime();
+          const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`).getTime();
+          return dateA - dateB;
+        });
+
+        this.confirmedAppointments.sort((a, b) => {
+          const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`).getTime();
+          const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`).getTime();
+          return dateA - dateB;
+        });
+
+        // Ordenar los appointments completados por fecha más reciente a más antigua
+        this.completedAppointments.sort((a, b) => {
+          return new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime();
+        });
+
+        // Almacenar los appointments en `this.appointments` para referencia general si es necesario
+        this.appointments = appointments;
+
+        console.log('Pending Appointments:', this.pendingAppointments);
+        console.log('Confirmed Appointments:', this.confirmedAppointments);
+        console.log('Completed Appointments:', this.completedAppointments);
+
+        // Obtener el nombre de los clientes por email y almacenarlos en el objeto customerNames
+        for (const appointment of appointments) {
+          if (appointment.customerEmail) {
+            const nombre = await this.getNombre(appointment.customerEmail);
+            this.customerNames[appointment.customerEmail] = nombre || 'Desconocido'; // Asignar un valor predeterminado si getNombre() devuelve void
+          }
+        }
+        // Filtrar inicialmente todos los appointments completados
+        this.filteredCompletedAppointments = this.completedAppointments;
+      },
+      (error) => {
+        console.error('Error al cargar los appointments', error);
       }
-    },
-    (error) => {
-      console.error('Error al cargar los appointments', error);
-    }
-  );
-}
+    );
+  }
+
+  // Método para aplicar el filtro a completedAppointments
+  filterCompletedAppointments() {
+    const currentDate = new Date();
+    this.filteredCompletedAppointments = this.completedAppointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.appointmentDate);
+
+      switch (this.selectedFilter) {
+        case 'today':
+          return (
+            appointmentDate.getDate() === currentDate.getDate() &&
+            appointmentDate.getMonth() === currentDate.getMonth() &&
+            appointmentDate.getFullYear() === currentDate.getFullYear()
+          );
+        case 'lastWeek':
+          const lastWeek = new Date();
+          lastWeek.setDate(currentDate.getDate() - 7);
+          return appointmentDate >= lastWeek && appointmentDate <= currentDate;
+        case 'last6Months':
+          const last6Months = new Date();
+          last6Months.setMonth(currentDate.getMonth() - 6);
+          return appointmentDate >= last6Months && appointmentDate <= currentDate;
+        case 'lastYear':
+          const lastYear = new Date();
+          lastYear.setFullYear(currentDate.getFullYear() - 1);
+          return appointmentDate >= lastYear && appointmentDate <= currentDate;
+        case 'all':
+        default:
+          return true;
+      }
+    });
+  }
 
 
   // Método para actualizar el status del appointment a 'COMPLETED'

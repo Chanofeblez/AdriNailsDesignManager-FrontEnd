@@ -6,6 +6,11 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-bottom: 80px;
+}
+
+.toolbar {
+  margin-top: 80px;
 }
 
 .list ion-grid {
@@ -19,7 +24,7 @@ ion-card {
   width: 100%; /* Asegura que no se estire más de lo necesario */
   //min-width: 200px; /* Controla el tamaño máximo de la tarjeta */
   max-width: 250px; /* Controla el tamaño máximo de la tarjeta */
-  height: 270px;
+  height: 230px;
   display: block;
 }
 

@@ -11,6 +11,11 @@
   align-items: center;  /* Alinea verticalmente el badge */
 }
 
+.tittle {
+  font-size: 14px;
+  font-weight: bold;
+}
+
 ion-badge {
   font-size: 12px; /* Ajusta el tamaño del texto dentro del badge */
   padding: 4px 8px; /* Ajusta el tamaño del badge */
@@ -122,9 +127,9 @@ ion-content {
 
 .align-center {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: -18px;
+  align-items:start;
+  justify-content:start;
+  margin-top: 70px;
   margin-left: -20px;
   margin-bottom: -20px;
 }
@@ -228,4 +233,39 @@ ion-col {
   margin-top: 15px;
   margin-bottom: 80px;
 }
+
+.button-group {
+  display: flex;
+  gap: 10px; /* Espacio entre botones */
+  margin-top: 10px; /* Separación superior de los botones */
+}
+
+.button-group button {
+  background-color: #4CAF50; /* Color de fondo para el botón */
+  border: none; /* Quitar borde */
+  color: white; /* Color del texto */
+  padding: 10px 20px; /* Espaciado interno */
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 5px 2px;
+  cursor: pointer;
+  border-radius: 5px; /* Esquinas redondeadas */
+  transition: background-color 0.3s; /* Transición suave */
+}
+
+.button-group button:hover {
+  background-color: #45a049; /* Color de fondo en hover */
+}
+
+.button-group .accept {
+  background-color: #4CAF50; /* Color de fondo verde para "Aceptar" */
+}
+
+.button-group .cancel {
+  background-color: #f44336; /* Color de fondo rojo para "Cancelar" */
+}
+
+
 

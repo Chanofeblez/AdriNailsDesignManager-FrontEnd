@@ -6,13 +6,13 @@
   Copyright and Good Faith Purchasers © 2023-present initappz.
 -->
 <ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title>My Appointments</ion-title>
-  </ion-toolbar>
-  <ion-toolbar>
+  <ion-toolbar class="toolbar">
     <ion-segment [(ngModel)]="currentSegment" mode="md" color="primary" [scrollable]="true">
       <ion-segment-button value="upcoming">
-        <ion-label>Upcoming</ion-label>
+        <ion-label>Approved</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pending">
+        <ion-label>Pending</ion-label>
       </ion-segment-button>
       <ion-segment-button value="completed">
         <ion-label>Completed</ion-label>
@@ -27,69 +27,117 @@
 
 <ion-content class="ion-padding">
   <div class="appointment-screen">
-    <div class="list" *ngIf="currentSegment =='upcoming'">
-      <ion-row *ngFor="let appointment of appointments;let i =index;" class="row-content" (click)="onInfo(appointment)">
-        <ion-col size="3" >
-          <div class="cover" [ngStyle]="{'background-image': 'url(' + appointment.imagePath + ')'}"></div>
-        </ion-col>
-        <ion-col size="9">
-          <div class="content">
-            <ion-badge [color]="getStatusColor(appointment.status)">{{ appointment.status }}</ion-badge>
-            <ion-label class="name" > {{appointment.serviceName}} </ion-label>
-            <ion-label class="name">Name:
-              <span class="service-name"> {{ customerNames[appointment.customerEmail] }}</span>  <!-- Mostrar el nombre del cliente -->
-            </ion-label>
-            <ion-label class="name">Price:
-              <span class="service-name"> ${{ appointment.totalCost }}</span>  <!-- Mostrar el nombre del cliente -->
-            </ion-label>
-            <ion-label class="date" ><ion-icon name="time-outline" class="name" ></ion-icon> &nbsp; {{ appointment.appointmentDate }} {{ formatAppointmentTime(appointment.appointmentTime) }}</ion-label>
-          <!-- <div class="buttons">
-              <div class="completed">
-                <ion-label class="lbl">Completed</ion-label>
-              </div>
-              <div class="running" (click)="openReviews()">
-                <ion-label class="lbl">Review</ion-label>
-              </div>
-              <div class="pending">
-                <ion-label class="lbl">Pending</ion-label>
-              </div>
-            </div> -->
-          </div>
-        </ion-col>
-      </ion-row>
+    <div class="list" *ngIf="currentSegment == 'upcoming'">
+      <div *ngIf="confirmedAppointments.length > 0; else noAppointments">
+        <ion-row *ngFor="let appointment of confirmedAppointments; let i = index" class="row-content"
+          (click)="onInfo(appointment)">
+          <ion-col size="3">
+            <div class="cover" [ngStyle]="{'background-image': 'url(' + appointment.imagePath + ')'}"></div>
+          </ion-col>
+          <ion-col size="9">
+            <div class="content">
+              <ion-badge [color]="getStatusColor(appointment.status)">{{ appointment.status }}</ion-badge>
+              <ion-label class="name">{{ appointment.serviceName }}</ion-label>
+              <ion-label class="name">Name: <span class="service-name">{{ customerNames[appointment.customerEmail]
+                  }}</span></ion-label>
+              <ion-label class="name">Price: <span class="service-name">{{ appointment.totalCost }}</span></ion-label>
+              <ion-label class="date"><ion-icon name="time-outline"></ion-icon>&nbsp;{{ appointment.appointmentDate }}
+                {{ formatAppointmentTime(appointment.appointmentTime) }}</ion-label>
+              <!-- Aquí puedes añadir botones u otros elementos dentro del div.buttons -->
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+
+      <!-- Template para mostrar cuando no hay appointments confirmados -->
+      <ng-template #noAppointments>
+        <div class="no-appointments-message">
+          No confirmed upcoming appointments
+        </div>
+      </ng-template>
     </div>
 
-    <div class="list" *ngIf="currentSegment =='completed'">
-      <ion-row *ngFor="let appointment of completedAppointments;let i =index;" class="row-content" (click)="onInfo(appointment)">
-        <ion-col size="3" >
-          <div class="cover" [ngStyle]="{'background-image': 'url(' + appointment.imagePath + ')'}"></div>
+
+    <div class="list" *ngIf="currentSegment == 'pending'">
+      <div *ngIf="pendingAppointments.length > 0; else noPendingAppointments">
+        <ion-row *ngFor="let appointment of pendingAppointments; let i = index" class="row-content"
+          (click)="onInfo(appointment)">
+          <ion-col size="3">
+            <div class="cover" [ngStyle]="{'background-image': 'url(' + appointment.imagePath + ')'}"></div>
+          </ion-col>
+          <ion-col size="9">
+            <div class="content">
+              <ion-badge [color]="getStatusColor(appointment.status)">{{ appointment.status }}</ion-badge>
+              <ion-label class="name">{{ appointment.serviceName }}</ion-label>
+              <ion-label class="name">Name: <span class="service-name">{{ customerNames[appointment.customerEmail]
+                  }}</span></ion-label>
+              <ion-label class="name">Price: <span class="service-name">{{ appointment.totalCost }}</span></ion-label>
+              <ion-label class="date"><ion-icon name="time-outline"></ion-icon>&nbsp;{{ appointment.appointmentDate }}
+                {{ formatAppointmentTime(appointment.appointmentTime) }}</ion-label>
+              <!-- Aquí puedes añadir botones u otros elementos dentro del div.buttons -->
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+
+      <!-- Template para mostrar cuando no hay appointments pendientes -->
+      <ng-template #noPendingAppointments>
+        <div class="no-appointments-message">
+          No pending appointments
+        </div>
+      </ng-template>
+    </div>
+
+
+    <div class="list" *ngIf="currentSegment == 'completed'">
+
+      <ion-row class="filter-section">
+        <ion-col size="5.5">
+          <ion-item lines="none">
+            <ion-label position="floating">Filter</ion-label>
+            <ion-select [(ngModel)]="selectedFilter" (ionChange)="filterCompletedAppointments()">
+              <ion-select-option value="all">All</ion-select-option>
+              <ion-select-option value="today">Today</ion-select-option>
+              <ion-select-option value="lastWeek">Last Week</ion-select-option>
+              <ion-select-option value="last6Months">Last 6 Months</ion-select-option>
+              <ion-select-option value="lastYear">Last Year</ion-select-option>
+            </ion-select>
+          </ion-item>
         </ion-col>
-        <ion-col size="9">
-          <div class="content">
-            <ion-badge [color]="getStatusColor(appointment.status)">{{ appointment.status }}</ion-badge>
-            <ion-label class="name" > {{appointment.serviceName}} </ion-label>
-            <ion-label class="name">Name:
-              <span class="service-name"> {{ customerNames[appointment.customerEmail] }}</span>  <!-- Mostrar el nombre del cliente -->
-            </ion-label>
-            <ion-label class="name">Price:
-              <span class="service-name"> ${{ appointment.totalCost }}</span>  <!-- Mostrar el nombre del cliente -->
-            </ion-label>
-            <ion-label class="date" ><ion-icon name="time-outline" class="name" ></ion-icon> &nbsp; {{ appointment.appointmentDate }} {{ formatAppointmentTime(appointment.appointmentTime) }}</ion-label>
-          <!-- <div class="buttons">
-              <div class="completed">
-                <ion-label class="lbl">Completed</ion-label>
-              </div>
-              <div class="running" (click)="openReviews()">
-                <ion-label class="lbl">Review</ion-label>
-              </div>
-              <div class="pending">
-                <ion-label class="lbl">Pending</ion-label>
-              </div>
-            </div> -->
-          </div>
+        <ion-col size="6.5" class="appointments-found">
+          <p>{{ filteredCompletedAppointments.length }} appointments found</p>
         </ion-col>
       </ion-row>
+
+
+      <div *ngIf="filteredCompletedAppointments.length > 0; else noCompletedAppointments">
+        <ion-row *ngFor="let appointment of filteredCompletedAppointments; let i = index" class="row-content"
+          (click)="onInfo(appointment)">
+          <ion-col size="3">
+            <div class="cover" [ngStyle]="{'background-image': 'url(' + appointment.imagePath + ')'}"></div>
+          </ion-col>
+          <ion-col size="9">
+            <div class="content">
+              <ion-badge [color]="getStatusColor(appointment.status)">{{ appointment.status }}</ion-badge>
+              <ion-label class="name">{{ appointment.serviceName }}</ion-label>
+              <ion-label class="name">Name: <span class="service-name">{{ customerNames[appointment.customerEmail]
+                  }}</span></ion-label>
+              <ion-label class="name">Price: <span class="service-name">{{ appointment.totalCost }}</span></ion-label>
+              <ion-label class="date"><ion-icon name="time-outline"></ion-icon>&nbsp;{{ appointment.appointmentDate }}
+                {{ formatAppointmentTime(appointment.appointmentTime) }}</ion-label>
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+
+      <ng-template #noCompletedAppointments>
+        <div class="no-appointments-message">
+          No completed appointments available
+        </div>
+      </ng-template>
     </div>
+
+
 
     <div class="list" *ngIf="currentSegment =='customer'">
       <div class="navigations-button" *ngFor="let customer of customers">

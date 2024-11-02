@@ -7,7 +7,7 @@
 */
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Appointment } from 'src/app/models/appointment.interface';
+import { Appointment, AppointmentStatus } from 'src/app/models/appointment.interface';
 import { CustomerInterface } from 'src/app/models/customer.interface';
 import { Servicio, ServicioVariant } from 'src/app/models/servicios.interface';
 import { AppointmentService } from 'src/app/services/appointment.service';
@@ -29,6 +29,7 @@ export class BookingInfoPage implements OnInit {
   formattedAppointmentDateTime: string;  // Declaración de la propiedad
   nombre: CustomerInterface;  // Declarar la propiedad nombre
   totalPrice: number = 0;
+  public AppointmentStatus = AppointmentStatus; // Exponemos el enum a la plantilla
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -106,7 +107,7 @@ export class BookingInfoPage implements OnInit {
         rating: 0,
         customerPhoto: ''
       };
-      console.log("this.appointment.review",this.appointment.review);
+      console.log("this.appointment.review", this.appointment.review);
     }
   }
 
@@ -202,25 +203,47 @@ export class BookingInfoPage implements OnInit {
     console.log("Total Price:", this.totalPrice);
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'PENDING':
-        return 'warning';
-      case 'CONFIRMED':
-        return 'secondary';
-      case 'COMPLETED':
-        return 'success';
-      case 'CANCELED':
-        return 'danger';
-      default:
-        return 'primary';
+  updateStatus(newStatus: AppointmentStatus) {
+    if (!this.appointmentId) {
+      console.error('El ID de la cita es nulo.');
+      return; // Termina la función si appointmentId es nulo
+    }
+
+    if (Object.values(AppointmentStatus).includes(newStatus)) {
+      this.appointmentService.updateAppointmentStatus(this.appointmentId, newStatus).subscribe({
+        next: (response) => {
+          this.appointment.status = newStatus;
+          console.log('El estado del appointment ha sido cambiado a:', newStatus);
+          this.router.navigate(['/appointments']);
+        },
+        error: (error) => {
+          console.error('Error al actualizar el estado en el backend:', error);
+        }
+      });
+    } else {
+      console.error('Estado no válido:', newStatus);
     }
   }
 
-
+  getStatusColor(status: string) {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'success';
+      case 'CANCELED':
+        return 'danger';
+      case 'PENDING':
+        return 'warning';
+      default:
+        return 'medium';
+    }
+  }
 
   onBack() {
     this.router.navigate(['/appointments']);
+  }
+
+  goToCustomerInfo(customer: CustomerInterface) {
+    this.router.navigate(['/customer-info', customer.id, customer.email]);
   }
 
 }

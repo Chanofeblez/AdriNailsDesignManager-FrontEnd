@@ -5,6 +5,10 @@
   terms found in the Website https://initappz.com/license
   Copyright and Good Faith Purchasers © 2023-present initappz.
 */
+.toolbar {
+  margin-top: 80px;
+}
+
 ion-segment {
   --background: transparent; /* Fondo transparente */
   --indicator-color: #d4a5a5; /* Color de la línea de selección */
@@ -13,10 +17,14 @@ ion-segment {
 }
 
 ion-segment-button {
+  width: 18px;
   flex-grow: 1; /* Hace que cada botón ocupe el mismo espacio */
   text-align: center;
-  font-size: 14px; /* Ajusta el tamaño de la fuente */
+  font-size: 12.5px; /* Ajusta el tamaño de la fuente */
   white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  --padding-top: 5px; /* Reduce el padding superior */
+  --padding-bottom: 5px; /* Reduce el padding inferior */
+  margin: 0 4px; /* Reduce el espacio entre los botones */
 }
 
 .content {
@@ -89,6 +97,55 @@ ion-icon {
   color: #333;
   font-size: 20px;
 }
+
+.no-appointments-message {
+  text-align: center;
+  font-size: 1.2em;
+  color: #666;
+  padding: 20px;
+}
+
+.filter-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0; /* Ajusta padding a 0 para eliminar cualquier espacio extra */
+  margin: 0; /* Asegúrate de que el margen también esté en 0 */
+}
+
+.filter-section ion-item,
+.filter-section ion-label,
+.filter-section p {
+    margin: 0;
+    padding: 0;
+}
+
+.filter-section ion-item {
+  display: flex;
+  align-items: center;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  width: 100%;
+}
+
+.filter-section p {
+  font-size: 14px;
+  color: #333;
+}
+
+.appointments-count p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+}
+
+.appointments-found {
+  text-align: right; /* Para alinear el texto a la derecha en la misma fila */
+}
+
+
 
 
 
