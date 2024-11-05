@@ -5,8 +5,9 @@
   terms found in the Website https://initappz.com/license
   Copyright and Good Faith Purchasers © 2023-present initappz.
 */
-import { Component, OnInit } from '@angular/core';
-import { UtilService } from 'src/app/services/util.service';
+import { Component, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -14,28 +15,28 @@ import { UtilService } from 'src/app/services/util.service';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
+  email: string = '';
+  password: string = '';
   passwordView: boolean = false;
-  constructor(
-    public util: UtilService
-  ) { }
+  errorMessage: string = '';
 
-  ngOnInit() {
-  }
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  toggePassword() {
+  constructor() {}
+
+  ngOnInit() {}
+
+  togglePassword() {
     this.passwordView = !this.passwordView;
   }
 
-  onRegister() {
-    this.util.navigateToPage('/register');
-  }
-
-  onHome() {
-    this.util.navigateRoot('/location');
-  }
-
-  onReset() {
-    this.util.navigateToPage('forgot-password');
-  }
+  onLogin() {
+    if (!this.authService.login(this.email, this.password)) {
+        console.log('Credenciales incorrectas');
+        this.errorMessage = 'Credenciales incorrectas';
+        // Muestra un mensaje de error aquí, si es necesario
+    }
+}
 
 }

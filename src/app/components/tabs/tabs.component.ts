@@ -7,7 +7,6 @@
 */
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { UtilService } from 'src/app/services/util.service';
 
 @Component({
   selector: 'app-tabs',
@@ -19,7 +18,6 @@ export class TabsComponent implements OnInit {
   @Input() navigation: string;
 
   private router = inject(Router);
-  public util = inject(UtilService);
 
   constructor() { }
 

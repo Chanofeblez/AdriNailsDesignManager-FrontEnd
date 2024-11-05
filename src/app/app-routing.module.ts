@@ -7,6 +7,7 @@
 */
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -36,7 +37,8 @@ const routes: Routes = [
   },
   {
     path: 'home',
-    loadChildren: () => import('./pages/home/home.module').then(m => m.HomePageModule)
+    loadChildren: () => import('./pages/home/home.module').then(m => m.HomePageModule),
+    canActivate: [AuthGuard]
   },
   {
     path: 'inbox',
@@ -126,6 +128,7 @@ const routes: Routes = [
     path: 'customer-info/:id/:email',
     loadChildren: () => import('./pages/customer-info/customer-info.module').then( m => m.CustomerInfoPageModule)
   },
+  { path: '**', redirectTo: 'login' }
 ];
 
 @NgModule({

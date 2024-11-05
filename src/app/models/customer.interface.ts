@@ -1,14 +1,30 @@
 export interface CustomerInterface {
-  id: string; // Este campo es opcional ya que se genera en el backend.
+  id: string;
   name: string;
   email: string;
   password: string;
   phoneNumber: string;
-  enabled?: boolean; // Estos campos también pueden ser opcionales dependiendo de si los manejas en el frontend o solo en el backend.
+  enabled: boolean;
   accountNotExpired?: boolean;
   accountNotLocked?: boolean;
   credentialNotExpired?: boolean;
-  createdAt?: string; // Puede ser Date, pero si recibes un string del backend, úsalo como string.
+  createdAt?: string;
   updatedAt?: string;
-  paymentMethodId?: string; // Si estás almacenando el método de pago.
+  paymentMethodId?: string;
+
+  // Añadimos la propiedad customerCourses que contiene una lista de cursos
+  customerCourses?: {
+    course: {
+      id: string;
+      title: string;
+      description: string;
+      price: number;
+      imagePath: string;
+      videoPaths: string[];
+      pdfPaths: string[];
+      status: string;
+    };
+    paymentStatus: boolean;
+  }[];
 }
+

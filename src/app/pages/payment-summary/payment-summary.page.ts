@@ -5,10 +5,11 @@
   terms found in the Website https://initappz.com/license
   Copyright and Good Faith Purchasers © 2023-present initappz.
 */
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { UtilService } from 'src/app/services/util.service';
 import { PaymentModalsPage } from '../payment-modals/payment-modals.page';
+import { AppointmentService } from 'src/app/services/appointment.service';
+import { Appointment } from 'src/app/models/appointment.interface';
 
 @Component({
   selector: 'app-payment-summary',
@@ -17,30 +18,99 @@ import { PaymentModalsPage } from '../payment-modals/payment-modals.page';
 })
 export class PaymentSummaryPage implements OnInit {
 
-  constructor(
-    public util: UtilService,
-    private modalController: ModalController
-  ) { }
+  totalEarnings: number = 0;
+  reportData: { date: string; earnings: number }[] = [];
+  currentPeriod: string = 'day';
+
+  constructor(private appointmentService: AppointmentService) {}
 
   ngOnInit() {
+    this.loadEarningsData();
+    this.currentPeriod = "day";
   }
 
-  onBack() {
-    this.util.onBack();
+  onPeriodChange(event: any) {
+    this.currentPeriod = event.detail.value;
+    this.loadEarningsData();
   }
 
-  async openPaymentModal() {
-    const modal = await this.modalController.create({
-      component: PaymentModalsPage,
-      cssClass: 'payment-modal'
+  loadEarningsData() {
+    this.appointmentService.getAllAppointments().subscribe(appointments => {
+      // Filtrar appointments completados
+      const completedAppointments = appointments.filter(appointment => appointment.status === 'COMPLETED');
+
+      // Calcular ganancias según el período seleccionado
+      let earningsByPeriod = this.calculateEarningsByPeriod(completedAppointments);
+
+      // Ordenar en orden descendente por fecha
+      earningsByPeriod = earningsByPeriod.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      // Asignar los datos ordenados a reportData
+      this.reportData = earningsByPeriod;
+
+      // Calcular el total de ganancias
+      this.totalEarnings = earningsByPeriod.reduce((sum, report) => sum + report.earnings, 0);
     });
-    modal.onDidDismiss().then((data) => {
-      console.log(data);
-      if (data && data.data && data.data == 'ok') {
-        this.util.navigateToPage('success-payments');
+  }
+
+
+  calculateEarningsByPeriod(appointments: Appointment[]): { date: string; earnings: number }[] {
+    const earningsByPeriod: { date: string; earnings: number }[] = [];
+    const periodFormat = this.currentPeriod === 'week' ? 'week' : this.getDateFormat(this.currentPeriod);
+
+    const groupedAppointments = appointments.reduce((acc, appointment) => {
+      let dateKey: string;
+
+      if (this.currentPeriod === 'week') {
+        // Agrupar por semana
+        const appointmentDate = new Date(appointment.appointmentDate);
+        const startOfWeek = new Date(appointmentDate);
+        startOfWeek.setDate(appointmentDate.getDate() - appointmentDate.getDay()); // Primer día de la semana
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Último día de la semana
+
+        dateKey = `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      } else {
+        // Agrupar por día, mes o año
+        dateKey = new Date(appointment.appointmentDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: this.currentPeriod === 'month' || this.currentPeriod === 'day' ? 'short' : undefined,
+          day: this.currentPeriod === 'day' ? 'numeric' : undefined,
+        });
+
       }
-    });
-    await modal.present();
+
+
+
+      if (!acc[dateKey]) {
+        acc[dateKey] = 0;
+      }
+      acc[dateKey] += appointment.totalCost; // Asumiendo que `totalCost` representa la ganancia
+
+      return acc;
+    }, {} as { [key: string]: number });
+
+    for (const date in groupedAppointments) {
+      earningsByPeriod.push({ date, earnings: groupedAppointments[date] });
+    }
+
+    return earningsByPeriod;
+  }
+
+
+  getDateFormat(period: string): Intl.DateTimeFormatOptions {
+    switch (period) {
+      case 'day':
+        return { day: 'numeric', month: 'short', year: 'numeric' };
+      case 'week':
+        return { day: 'numeric', month: 'short', year: 'numeric' }; // Puedes adaptar el formato de semana si es necesario
+      case 'month':
+        return { month: 'short', year: 'numeric' };
+      case 'year':
+        return { year: 'numeric' };
+      default:
+        return { day: 'numeric', month: 'short', year: 'numeric' };
+    }
   }
 
 }

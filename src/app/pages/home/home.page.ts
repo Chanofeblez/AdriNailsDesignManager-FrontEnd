@@ -41,54 +41,56 @@ export class HomePage {
 
   loadAppointmentsData() {
     this.appointmentService.getAllAppointments().subscribe((appointments: Appointment[]) => {
-      console.log("appointments",appointments);
+      console.log("appointments", appointments);
       this.events = [];
+
+      // Itera sobre cada appointment y filtra por el rango de la semana actual
       appointments.forEach(appointment => {
         const appointmentDate = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
 
-        if (isNaN(appointmentDate.getTime())) {
-          console.error("appointmentDate is invalid", appointment);
-          return;
+        // Verifica si la fecha de la cita está dentro del rango de la semana actual
+        if (appointmentDate >= this.startOfWeek && appointmentDate <= this.endOfWeek) {
+
+          const endDate = new Date(appointmentDate);
+          endDate.setHours(endDate.getHours() + 2);
+
+          let cssClass = '';
+          switch (appointment.status) {
+            case 'CONFIRMED':
+              cssClass = 'appointment-confirmed';
+              break;
+            case 'PENDING':
+              cssClass = 'appointment-pending';
+              break;
+            case 'COMPLETED':
+              cssClass = 'appointment-completed';
+              break;
+            default:
+              cssClass = 'appointment-default';
+          }
+
+          // Llamada para obtener el nombre del cliente
+          this.customerService.getCustomerByEmail(appointment.customerEmail).subscribe(customer => {
+            const customerName = customer ? customer.name : 'Unknown';
+            const customerId = customer ? customer.id : null;
+
+            // Agrega el evento solo si la fecha está dentro del rango de la semana actual
+            this.events.push({
+              start: appointmentDate,
+              end: endDate,
+              title: `${customerName}`,
+              cssClass: cssClass,
+              customerId: customerId,
+              customerEmail: appointment.customerEmail,
+              status: appointment.status,
+              appointmentId: appointment.id
+            } as CustomCalendarEvent);
+          });
         }
-
-        const endDate = new Date(appointmentDate);
-        endDate.setHours(endDate.getHours() + 2);
-
-        let cssClass = '';
-        switch (appointment.status) {
-          case 'CONFIRMED':
-            cssClass = 'appointment-confirmed';
-            break;
-          case 'PENDING':
-            cssClass = 'appointment-pending';
-            break;
-          case 'COMPLETED':
-            cssClass = 'appointment-completed';
-            break;
-          default:
-            cssClass = 'appointment-default';
-        }
-
-        // Llamada para obtener el nombre del cliente
-        this.customerService.getCustomerByEmail(appointment.customerEmail).subscribe(customer => {
-          const customerName = customer ? customer.name : 'Unknown';
-          const customerId = customer ? customer.id : null;
-
-          // Agrega el evento con el nombre del cliente si la fecha es válida
-          this.events.push({
-            start: appointmentDate,
-            end: endDate,
-            title: `${customerName}`,
-            cssClass: cssClass,
-            customerId: customerId,
-            customerEmail: appointment.customerEmail,
-            status: appointment.status,
-            appointmentId: appointment.id
-          } as CustomCalendarEvent);
-        });
       });
     });
   }
+
 
   handleEvent(event: CustomCalendarEvent): void {
     console.log('Evento clickeado:', event);
@@ -116,12 +118,14 @@ export class HomePage {
   goToPreviousWeek(): void {
     this.viewDate = subDays(this.viewDate, 7);
     this.updateWeekRange();
+    this.loadAppointmentsData(); // Cargar los appointments de la semana actualizada
     this.refresh.next(undefined);
   }
 
   goToNextWeek(): void {
     this.viewDate = addDays(this.viewDate, 7);
     this.updateWeekRange();
+    this.loadAppointmentsData(); // Cargar los appointments de la semana actualizada
     this.refresh.next(undefined);
   }
 
