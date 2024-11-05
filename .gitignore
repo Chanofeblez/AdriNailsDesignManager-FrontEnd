@@ -110,3 +110,26 @@ Thumbs.db
 >>>>>>> 93d2d93 (Creating Repository)
 =======
 >>>>>>> 93d2d93f0360a1014ed2c75cb7d2447464405e0d
+
+# Excluir módulos específicos en la carpeta pages
+src/app/pages/chats/
+src/app/pages/forgot-password/
+src/app/pages/inbox/
+src/app/pages/location/
+src/app/pages/near-by/
+src/app/pages/near-salon/
+src/app/pages/payment-modals/
+src/app/pages/popular-salon/
+src/app/pages/register/
+src/app/pages/salon-info/
+src/app/pages/search-location/
+src/app/pages/select-gender/
+src/app/pages/select-slot/
+src/app/pages/services/
+src/app/pages/services-list/
+src/app/pages/success-payments/
+src/app/pages/verify/
+src/app/pages/welcome/
+src/app/pages/write-reviews/
+src/app/services/util.service.ts
+
